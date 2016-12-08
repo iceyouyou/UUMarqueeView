@@ -128,6 +128,7 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
         return;
     }
 
+    [self scrollTimerDidFire:nil];
     _scrollTimer = [MSWeakTimer scheduledTimerWithTimeInterval:_timeIntervalPerScroll
                                                         target:self
                                                       selector:@selector(scrollTimerDidFire:)
