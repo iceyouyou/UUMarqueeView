@@ -31,7 +31,7 @@ Then implement `UUMarqueeViewDelegate` protocol:
 - Supports iOS iOS7+.
 
 ## Additional
-Using NSWeakTimer to avoid retain cycle problem.:
+Using NSWeakTimer to avoid retain cycle problem.  
 MSWeakTimer Github page: https://github.com/mindsnacks/MSWeakTimer
 
 ## License
