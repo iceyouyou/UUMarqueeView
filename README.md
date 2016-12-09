@@ -44,7 +44,7 @@ Sample code:
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView {
     // this will be called to create every row view in '-(void)reloadData'.
     // add any subviews you want but do not set any content.
-    // ### please give a tag on all of your changeable subviews then you can find it later.
+    // ### give a tag on all of your changeable subviews then you can find it later.
     UILabel *content = [[UILabel alloc] initWithFrame:itemView.bounds];
     content.font = [UIFont systemFontOfSize:10.0f];
     content.tag = 1001;
