@@ -54,7 +54,7 @@ Sample code:
 - (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView {
     // set your content to subviews you just create.
     // this will be called on each time the MarqueeView scrolls.
-    // 'data' is the element of data source array which set in '-(NSArray*)dataSourceArrayForMarqueeView:'
+    // 'data' is the element of data source array which set in '-(NSArray*)dataSourceArrayForMarqueeView:'.
     UILabel *content = [itemView viewWithTag:1001];
     content.text = data;
 }
