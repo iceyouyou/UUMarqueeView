@@ -105,7 +105,7 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
         }
     }
 
-    [self start];
+    [self startAfterTimeInterval:YES];
 }
 
 - (void)repositionItemViews {
@@ -124,11 +124,17 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
 }
 
 - (void)start {
+    [self startAfterTimeInterval:NO];
+}
+
+- (void)startAfterTimeInterval:(BOOL)afterTimeInterval {
     if (_scrollTimer || _items.count <= 0) {
         return;
     }
 
-    [self scrollTimerDidFire:nil];
+    if (!afterTimeInterval) {
+        [self scrollTimerDidFire:nil];
+    }
     _scrollTimer = [MSWeakTimer scheduledTimerWithTimeInterval:_timeIntervalPerScroll
                                                         target:self
                                                       selector:@selector(scrollTimerDidFire:)
