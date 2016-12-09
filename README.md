@@ -42,8 +42,8 @@ Sample code:
 }
 
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView {
-    // this will be called to create every row view in '-(void)reloadData'.
     // add any subviews you want but do not set any content.
+    // this will be called to create every row view in '-(void)reloadData'.
     // ### give a tag on all of your changeable subviews then you can find it later.
     UILabel *content = [[UILabel alloc] initWithFrame:itemView.bounds];
     content.font = [UIFont systemFontOfSize:10.0f];
@@ -52,8 +52,7 @@ Sample code:
 }
 
 - (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView {
-    // set your content to subviews you just create.
-    // this will be called on each time the MarqueeView scrolls.
+    // set content to subviews, this will be called on each time the MarqueeView scrolls.
     // 'data' is the element of data source array which set in '-(NSArray*)dataSourceArrayForMarqueeView:'.
     UILabel *content = [itemView viewWithTag:1001];
     content.text = data;
