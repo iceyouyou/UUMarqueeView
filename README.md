@@ -62,7 +62,7 @@ Sample code:
 
 ## Compatibility
 - Requires ARC.
-- Supports iOS iOS7+.
+- Supports iOS7+.
 
 ## Additional
 Using NSWeakTimer to avoid retain cycle problem.  
