@@ -42,22 +42,48 @@
     [self nothingImportant];
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+
+    if (_simpleMarqueeView) {
+        [_simpleMarqueeView start];
+    }
+    if (_customMarqueeView) {
+        [_customMarqueeView start];
+    }
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+
+    if (_simpleMarqueeView) {
+        [_simpleMarqueeView pause];
+    }
+    if (_customMarqueeView) {
+        [_customMarqueeView pause];
+    }
+}
+
 #pragma mark -- UUMarqueeViewDelegate
 
 - (NSInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
     if (marqueeView == _simpleMarqueeView) {
+        // for simpleMarqueeView
         return 1;
     } else {
+        // for customMarqueeView
         return 3;
     }
 }
 
 - (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView {
     if (marqueeView == _simpleMarqueeView) {
+        // for simpleMarqueeView
         return @[@"Do not go gentle into that good night,",
                  @"Old age should burn and rave at close of day;",
                  @"Rage, rage against the dying of the light."];
     } else {
+        // for customMarqueeView
         return @[@{@"content":@"First snow at Forbidden City", @"time":@"10 seconds ago", @"icon":@"icon-1"},
                  @{@"content":@"Night view of Longmen Grottoes", @"time":@"12 minutes ago", @"icon":@"icon-2"},
                  @{@"content":@"Unexpected surprise for travelers", @"time":@"20 minutes ago", @"icon":@"icon-3"},
@@ -68,6 +94,7 @@
 
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView {
     if (marqueeView == _simpleMarqueeView) {
+        // for simpleMarqueeView
         itemView.backgroundColor = [UIColor colorWithRed:228.0f/255.0f green:228.0f/255.0f blue:228.0f/255.0f alpha:1.0f];
 
         UILabel *content = [[UILabel alloc] initWithFrame:itemView.bounds];
@@ -75,6 +102,7 @@
         content.tag = 1001;
         [itemView addSubview:content];
     } else {
+        // for customMarqueeView
         itemView.backgroundColor = [UIColor colorWithRed:228.0f/255.0f green:228.0f/255.0f blue:228.0f/255.0f alpha:1.0f];
 
         UIImageView *icon = [[UIImageView alloc] initWithFrame:CGRectMake(5.0f, (CGRectGetHeight(itemView.bounds) - 16.0f) / 2.0f, 16.0f, 16.0f)];
@@ -96,9 +124,11 @@
 
 - (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView {
     if (marqueeView == _simpleMarqueeView) {
+        // for simpleMarqueeView
         UILabel *content = [itemView viewWithTag:1001];
         content.text = data;
     } else {
+        // for customMarqueeView
         UILabel *content = [itemView viewWithTag:1001];
         content.text = [data objectForKey:@"content"];
 
