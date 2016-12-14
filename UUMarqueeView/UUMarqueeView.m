@@ -161,9 +161,10 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
             [_delegate updateItemView:_items[_topItemIndex] withData:[self nextData] forMarqueeView:self];
         }
 
+        int currentTopItemIndex = _topItemIndex;
         [UIView animateWithDuration:_timeDurationPerScroll animations:^{
             for (int i = 0; i < _items.count; i++) {
-                int index = (i + _topItemIndex) % _items.count;
+                int index = (i + currentTopItemIndex) % _items.count;
                 if (i == 0) {
                     continue;
                 } else if (i == 1) {
@@ -172,9 +173,8 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
                     [_items[index] setFrame:CGRectMake(0.0f, itemHeight * (i - 2), itemWidth, itemHeight)];
                 }
             }
-        } completion:^(BOOL finished) {
-            [self moveToNextItemIndex];
         }];
+        [self moveToNextItemIndex];
     });
 }
 
