@@ -23,6 +23,7 @@
 @property (nonatomic, weak) id<UUMarqueeViewDelegate> delegate;
 @property (nonatomic, assign) NSTimeInterval timeIntervalPerScroll;
 @property (nonatomic, assign) NSTimeInterval timeDurationPerScroll;
+@property (nonatomic, assign) BOOL clipsToBounds;
 
 - (void)reloadData;
 - (void)start;

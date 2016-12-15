@@ -59,6 +59,10 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
     [self repositionItemViews];
 }
 
+- (void)setClipsToBounds:(BOOL)clipsToBounds {
+    _contentView.clipsToBounds = clipsToBounds;
+}
+
 - (void)reloadData {
     [self pause];
 
