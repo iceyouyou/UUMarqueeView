@@ -55,7 +55,7 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
 - (void)layoutSubviews {
     [super layoutSubviews];
 
-    [self.contentView setFrame:self.bounds];
+    [_contentView setFrame:self.bounds];
     [self repositionItemViews];
 }
 
@@ -211,9 +211,9 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
 }
 
 - (void)dealloc {
-    if (self.scrollTimer) {
-        [self.scrollTimer invalidate];
-        self.scrollTimer = nil;
+    if (_scrollTimer) {
+        [_scrollTimer invalidate];
+        _scrollTimer = nil;
     }
 }
 
