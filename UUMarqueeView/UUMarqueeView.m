@@ -200,7 +200,7 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
         dataSourceArray = [_delegate dataSourceArrayForMarqueeView:self];
     }
 
-    if (!dataSourceArray) {
+    if (!dataSourceArray || dataSourceArray.count <= 0) {
         return nil;
     }
 
