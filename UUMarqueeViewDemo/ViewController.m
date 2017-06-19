@@ -24,7 +24,7 @@
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
 
     // Simple Style
-    _simpleMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 105.0f, screenWidth - 40.0f, 20.0f)];
+    self.simpleMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 105.0f, screenWidth - 40.0f, 20.0f)];
     _simpleMarqueeView.delegate = self;
     _simpleMarqueeView.timeIntervalPerScroll = 2.0f;
     _simpleMarqueeView.timeDurationPerScroll = 1.0f;
@@ -32,7 +32,7 @@
     [_simpleMarqueeView reloadData];
 
     // Custom Style
-    _customMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 195.0f, screenWidth - 40.0f, 60.0f)];
+    self.customMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 195.0f, screenWidth - 40.0f, 60.0f)];
     _customMarqueeView.delegate = self;
     _customMarqueeView.timeIntervalPerScroll = 1.0f;
     _customMarqueeView.timeDurationPerScroll = 0.5f;
@@ -64,9 +64,9 @@
     }
 }
 
-#pragma mark -- UUMarqueeViewDelegate
+#pragma mark - UUMarqueeViewDelegate
 
-- (NSInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
+- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
     if (marqueeView == _simpleMarqueeView) {
         // for simpleMarqueeView
         return 1;
@@ -140,7 +140,7 @@
     }
 }
 
-#pragma mark -- Nothing Important
+#pragma mark - Nothing Important
 
 - (void)nothingImportant {
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;

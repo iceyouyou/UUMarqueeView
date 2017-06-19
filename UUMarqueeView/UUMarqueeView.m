@@ -22,19 +22,19 @@
 
 @implementation UUMarqueeView
 
-static NSInteger DEFAULT_VISIBLE_ITEM_COUNT = 2;
-static NSTimeInterval DEFAULT_TIME_INTERVAL = 4.0;
-static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
+static NSInteger const DEFAULT_VISIBLE_ITEM_COUNT = 2;
+static NSTimeInterval const DEFAULT_TIME_INTERVAL = 4.0;
+static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        _contentView = [[UIView alloc] initWithFrame:self.bounds];
+        self.contentView = [[UIView alloc] initWithFrame:self.bounds];
         _contentView.clipsToBounds = YES;
         [self addSubview:_contentView];
 
-        _timeIntervalPerScroll = DEFAULT_TIME_INTERVAL;
-        _timeDurationPerScroll = DEFAULT_TIME_DURATION;
+        self.timeIntervalPerScroll = DEFAULT_TIME_INTERVAL;
+        self.timeDurationPerScroll = DEFAULT_TIME_DURATION;
     }
     return self;
 }
@@ -42,12 +42,12 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        _contentView = [[UIView alloc] initWithFrame:self.bounds];
+        self.contentView = [[UIView alloc] initWithFrame:self.bounds];
         _contentView.clipsToBounds = YES;
         [self addSubview:_contentView];
 
-        _timeIntervalPerScroll = DEFAULT_TIME_INTERVAL;
-        _timeDurationPerScroll = DEFAULT_TIME_DURATION;
+        self.timeIntervalPerScroll = DEFAULT_TIME_INTERVAL;
+        self.timeDurationPerScroll = DEFAULT_TIME_DURATION;
     }
     return self;
 }
@@ -70,26 +70,26 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
         [_items makeObjectsPerformSelector:@selector(removeFromSuperview)];
         [_items removeAllObjects];
     } else {
-        _items = [NSMutableArray array];
+        self.items = [NSMutableArray array];
     }
 
     if ([_delegate respondsToSelector:@selector(numberOfVisibleItemsForMarqueeView:)]) {
-        _visibleItemCount = [_delegate numberOfVisibleItemsForMarqueeView:self];
+        self.visibleItemCount = [_delegate numberOfVisibleItemsForMarqueeView:self];
         if (_visibleItemCount <= 0) {
             return;
         }
     } else {
-        _visibleItemCount = DEFAULT_VISIBLE_ITEM_COUNT;
+        self.visibleItemCount = DEFAULT_VISIBLE_ITEM_COUNT;
     }
 
-    _dataIndex = 0;
+    self.dataIndex = 0;
 
     for (int i = 0; i < _visibleItemCount + 2; i++) {
         UIView *itemView = [[UIView alloc] init];
         [_contentView addSubview:itemView];
         [_items addObject:itemView];
     }
-    _topItemIndex = 0;
+    self.topItemIndex = 0;
 
     [self repositionItemViews];
 
@@ -139,18 +139,18 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
     if (!afterTimeInterval) {
         [self scrollTimerDidFire:nil];
     }
-    _scrollTimer = [MSWeakTimer scheduledTimerWithTimeInterval:_timeIntervalPerScroll
-                                                        target:self
-                                                      selector:@selector(scrollTimerDidFire:)
-                                                      userInfo:nil
-                                                       repeats:YES
-                                                 dispatchQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
+    self.scrollTimer = [MSWeakTimer scheduledTimerWithTimeInterval:_timeIntervalPerScroll
+                                                            target:self
+                                                          selector:@selector(scrollTimerDidFire:)
+                                                          userInfo:nil
+                                                           repeats:YES
+                                                     dispatchQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
 }
 
 - (void)pause {
     if (_scrollTimer) {
         [_scrollTimer invalidate];
-        _scrollTimer = nil;
+        self.scrollTimer = nil;
     }
 }
 
@@ -188,9 +188,9 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
 
 - (void)moveToNextItemIndex {
     if (_topItemIndex >= _items.count - 1) {
-        _topItemIndex = 0;
+        self.topItemIndex = 0;
     } else {
-        _topItemIndex++;
+        self.topItemIndex++;
     }
 }
 
@@ -205,15 +205,15 @@ static NSTimeInterval DEFAULT_TIME_DURATION = 1.0;
     }
 
     if (_dataIndex < 0 || _dataIndex > dataSourceArray.count - 1) {
-        _dataIndex = 0;
+        self.dataIndex = 0;
     }
-    return dataSourceArray[_dataIndex++];
+    return dataSourceArray[self.dataIndex++];
 }
 
 - (void)dealloc {
     if (_scrollTimer) {
         [_scrollTimer invalidate];
-        _scrollTimer = nil;
+        self.scrollTimer = nil;
     }
 }
 

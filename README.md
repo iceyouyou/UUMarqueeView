@@ -19,7 +19,7 @@ Then implement `UUMarqueeViewDelegate` protocol:
 ```objective-c
 @protocol UUMarqueeViewDelegate <NSObject>
 @optional
-- (NSInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;
+- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;
 - (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView;
@@ -28,7 +28,7 @@ Then implement `UUMarqueeViewDelegate` protocol:
 
 Sample code:
 ```objective-c
-- (NSInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
+- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
     // set a row count that you want to display.
     return 1;
 }

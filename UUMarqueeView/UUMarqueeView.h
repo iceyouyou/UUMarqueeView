@@ -12,7 +12,7 @@
 @protocol UUMarqueeViewDelegate;
 
 @protocol UUMarqueeViewDelegate <NSObject>
-- (NSInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;
+- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;
 - (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView;
