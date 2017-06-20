@@ -14,6 +14,9 @@
 @property (nonatomic, strong) UUMarqueeView *simpleMarqueeView;
 @property (nonatomic, strong) UUMarqueeView *customMarqueeView;
 
+@property (nonatomic, strong) NSArray *simpleMarqueeViewData;
+@property (nonatomic, strong) NSArray *customMarqueeViewData;
+
 @end
 
 @implementation ViewController
@@ -36,6 +39,7 @@
     _customMarqueeView.delegate = self;
     _customMarqueeView.timeIntervalPerScroll = 1.0f;
     _customMarqueeView.timeDurationPerScroll = 0.5f;
+    _customMarqueeView.touchEnabled = YES;
     [self.view addSubview:_customMarqueeView];
     [_customMarqueeView reloadData];
 
@@ -79,16 +83,22 @@
 - (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView {
     if (marqueeView == _simpleMarqueeView) {
         // for simpleMarqueeView
-        return @[@"Do not go gentle into that good night,",
-                 @"Old age should burn and rave at close of day;",
-                 @"Rage, rage against the dying of the light."];
+        if (!_simpleMarqueeViewData) {
+            self.simpleMarqueeViewData = @[@"Do not go gentle into that good night,",
+                                       @"Old age should burn and rave at close of day;",
+                                       @"Rage, rage against the dying of the light."];
+        }
+        return _simpleMarqueeViewData;
     } else {
         // for customMarqueeView
-        return @[@{@"content":@"First snow at Forbidden City", @"time":@"10 seconds ago", @"icon":@"icon-1"},
-                 @{@"content":@"Night view of Longmen Grottoes", @"time":@"12 minutes ago", @"icon":@"icon-2"},
-                 @{@"content":@"Unexpected surprise for travelers", @"time":@"20 minutes ago", @"icon":@"icon-3"},
-                 @{@"content":@"Drinking tea in outer space", @"time":@"1 hour ago", @"icon":@"icon-4"},
-                 @{@"content":@"Food along the Silk Road", @"time":@"2 hour ago", @"icon":@"icon-5"}];
+        if (!_customMarqueeViewData) {
+            self.customMarqueeViewData = @[@{@"content":@"First snow at Forbidden City", @"time":@"10 seconds ago", @"icon":@"icon-1"},
+                                           @{@"content":@"Night view of Longmen Grottoes", @"time":@"12 minutes ago", @"icon":@"icon-2"},
+                                           @{@"content":@"Unexpected surprise for travelers", @"time":@"20 minutes ago", @"icon":@"icon-3"},
+                                           @{@"content":@"Drinking tea in outer space", @"time":@"1 hour ago", @"icon":@"icon-4"},
+                                           @{@"content":@"Food along the Silk Road", @"time":@"2 hour ago", @"icon":@"icon-5"}];
+        }
+        return _customMarqueeViewData;
     }
 }
 
@@ -138,6 +148,10 @@
         UIImageView *icon = [itemView viewWithTag:1003];
         icon.image = [UIImage imageNamed:[data objectForKey:@"icon"]];
     }
+}
+
+- (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
+    NSLog(@"Touch at index %lu - \"%@\"", (unsigned long)index, [_customMarqueeViewData[index] objectForKey:@"content"]);
 }
 
 #pragma mark - Nothing Important

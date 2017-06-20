@@ -9,7 +9,7 @@
 #import "UUMarqueeView.h"
 #import "MSWeakTimer.h"
 
-@interface UUMarqueeView ()
+@interface UUMarqueeView () <UUMarqueeViewTouchResponder>
 
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, assign) NSInteger visibleItemCount;
@@ -17,6 +17,7 @@
 @property (nonatomic, assign) int topItemIndex;
 @property (nonatomic, assign) int dataIndex;
 @property (nonatomic, strong) MSWeakTimer *scrollTimer;
+@property (nonatomic, strong) UUMarqueeViewTouchReceiver *touchReceiver;
 
 @end
 
@@ -35,6 +36,7 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
 
         self.timeIntervalPerScroll = DEFAULT_TIME_INTERVAL;
         self.timeDurationPerScroll = DEFAULT_TIME_DURATION;
+        self.touchEnabled = NO;
     }
     return self;
 }
@@ -48,23 +50,59 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
 
         self.timeIntervalPerScroll = DEFAULT_TIME_INTERVAL;
         self.timeDurationPerScroll = DEFAULT_TIME_DURATION;
+        self.touchEnabled = NO;
     }
     return self;
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-
-    [_contentView setFrame:self.bounds];
-    [self repositionItemViews];
 }
 
 - (void)setClipsToBounds:(BOOL)clipsToBounds {
     _contentView.clipsToBounds = clipsToBounds;
 }
 
+- (void)setTouchEnabled:(BOOL)touchEnabled {
+    _touchEnabled = touchEnabled;
+    [self resetTouchReceiver];
+}
+
 - (void)reloadData {
     [self pause];
+    [self resetAll];
+    [self startAfterTimeInterval:YES];
+}
+
+- (void)start {
+    [self startAfterTimeInterval:NO];
+}
+
+- (void)pause {
+    if (_scrollTimer) {
+        [_scrollTimer invalidate];
+        self.scrollTimer = nil;
+    }
+}
+
+#pragma mark - Override(private)
+- (void)layoutSubviews {
+    [super layoutSubviews];
+
+    [_contentView setFrame:self.bounds];
+    [self repositionItemViews];
+    if (_touchEnabled && _touchReceiver) {
+        [_touchReceiver setFrame:self.bounds];
+    }
+}
+
+- (void)dealloc {
+    if (_scrollTimer) {
+        [_scrollTimer invalidate];
+        self.scrollTimer = nil;
+    }
+}
+
+#pragma mark - ItemView(private)
+- (void)resetAll {
+    self.dataIndex = -1;
+    self.topItemIndex = 0;
 
     if (_items) {
         [_items makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -82,14 +120,11 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
         self.visibleItemCount = DEFAULT_VISIBLE_ITEM_COUNT;
     }
 
-    self.dataIndex = 0;
-
     for (int i = 0; i < _visibleItemCount + 2; i++) {
         UIView *itemView = [[UIView alloc] init];
         [_contentView addSubview:itemView];
         [_items addObject:itemView];
     }
-    self.topItemIndex = 0;
 
     [self repositionItemViews];
 
@@ -103,13 +138,15 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
             if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
                 [_delegate createItemView:_items[index] forMarqueeView:self];
             }
+            id data = [self nextData];
+            _items[index].tag = _dataIndex;
             if ([_delegate respondsToSelector:@selector(updateItemView:withData:forMarqueeView:)]) {
-                [_delegate updateItemView:_items[index] withData:[self nextData] forMarqueeView:self];
+                [_delegate updateItemView:_items[index] withData:data forMarqueeView:self];
             }
         }
     }
 
-    [self startAfterTimeInterval:YES];
+    [self resetTouchReceiver];
 }
 
 - (void)repositionItemViews {
@@ -127,10 +164,19 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
     }
 }
 
-- (void)start {
-    [self startAfterTimeInterval:NO];
+- (int)itemIndexWithOffsetFromTop:(int)offsetFromTop {
+    return (_topItemIndex + offsetFromTop) % (_visibleItemCount + 2);
 }
 
+- (void)moveToNextItemIndex {
+    if (_topItemIndex >= _items.count - 1) {
+        self.topItemIndex = 0;
+    } else {
+        self.topItemIndex++;
+    }
+}
+
+#pragma mark - Timer & Animation(private)
 - (void)startAfterTimeInterval:(BOOL)afterTimeInterval {
     if (_scrollTimer || _items.count <= 0) {
         return;
@@ -147,13 +193,6 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
                                                      dispatchQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
 }
 
-- (void)pause {
-    if (_scrollTimer) {
-        [_scrollTimer invalidate];
-        self.scrollTimer = nil;
-    }
-}
-
 - (void)scrollTimerDidFire:(MSWeakTimer *)timer {
     dispatch_async(dispatch_get_main_queue(), ^() {
         CGFloat itemWidth = CGRectGetWidth(self.frame);
@@ -161,8 +200,10 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
 
         // move the top item to bottom without animation
         [_items[_topItemIndex] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, itemHeight)];
+        id data = [self nextData];
+        _items[_topItemIndex].tag = _dataIndex;
         if ([_delegate respondsToSelector:@selector(updateItemView:withData:forMarqueeView:)]) {
-            [_delegate updateItemView:_items[_topItemIndex] withData:[self nextData] forMarqueeView:self];
+            [_delegate updateItemView:_items[_topItemIndex] withData:data forMarqueeView:self];
         }
 
         int currentTopItemIndex = _topItemIndex;
@@ -182,18 +223,7 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
     });
 }
 
-- (int)itemIndexWithOffsetFromTop:(int)offsetFromTop {
-    return (_topItemIndex + offsetFromTop) % (_visibleItemCount + 2);
-}
-
-- (void)moveToNextItemIndex {
-    if (_topItemIndex >= _items.count - 1) {
-        self.topItemIndex = 0;
-    } else {
-        self.topItemIndex++;
-    }
-}
-
+#pragma mark - Data source(private)
 - (id)nextData {
     NSArray *dataSourceArray = nil;
     if ([_delegate respondsToSelector:@selector(dataSourceArrayForMarqueeView:)]) {
@@ -204,16 +234,53 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
         return nil;
     }
 
+    self.dataIndex = self.dataIndex + 1;
     if (_dataIndex < 0 || _dataIndex > dataSourceArray.count - 1) {
         self.dataIndex = 0;
     }
-    return dataSourceArray[self.dataIndex++];
+    return dataSourceArray[self.dataIndex];
 }
 
-- (void)dealloc {
-    if (_scrollTimer) {
-        [_scrollTimer invalidate];
-        self.scrollTimer = nil;
+#pragma mark - Touch handler(private)
+- (void)resetTouchReceiver {
+    if (_touchEnabled) {
+        if (!_touchReceiver) {
+            self.touchReceiver = [[UUMarqueeViewTouchReceiver alloc] init];
+            _touchReceiver.touchDelegate = self;
+            [self addSubview:_touchReceiver];
+        } else {
+            [self bringSubviewToFront:_touchReceiver];
+        }
+    } else {
+        if (_touchReceiver) {
+            [_touchReceiver removeFromSuperview];
+            self.touchReceiver = nil;
+        }
+    }
+}
+
+#pragma mark - UUMarqueeViewTouchResponder(private)
+- (void)touchAtPoint:(CGPoint)point {
+    for (UIView *itemView in _items) {
+        if ([itemView.layer.presentationLayer hitTest:point]) {
+            if ([self.delegate respondsToSelector:@selector(didTouchItemViewAtIndex:forMarqueeView:)]) {
+                [self.delegate didTouchItemViewAtIndex:itemView.tag forMarqueeView:self];
+            }
+            break;
+        }
+    }
+}
+
+@end
+
+#pragma mark - UUMarqueeViewTouchReceiver(private)
+@implementation UUMarqueeViewTouchReceiver
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    CGPoint touchLocation = [touch locationInView:self];
+    if (_touchDelegate) {
+        [_touchDelegate touchAtPoint:touchLocation];
     }
 }
 

@@ -4,6 +4,10 @@ Customizable marquee view for iOS
 ## Demo
 ![UUMarqueeView](https://raw.githubusercontent.com/iceyouyou/UUMarqueeView/master/extra/demo.gif)
 
+## Revision History
+- 2017/06/20 Add touch event handler
+- 2016/12/08 Basic marquee view function
+
 ## Usage
 Create the marquee view by:
 ```objective-c
@@ -11,6 +15,7 @@ self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f,
 self.marqueeView.delegate = self;
 self.marqueeView.timeIntervalPerScroll = 2.0f;
 self.marqueeView.timeDurationPerScroll = 1.0f;
+self.marqueeView.touchEnabled = YES;	// Set YES if you want to handle touch event. Default is NO.
 [self.view addSubview:self.marqueeView];
 [self.marqueeView reloadData];
 ```
@@ -18,11 +23,12 @@ self.marqueeView.timeDurationPerScroll = 1.0f;
 Then implement `UUMarqueeViewDelegate` protocol:
 ```objective-c
 @protocol UUMarqueeViewDelegate <NSObject>
-@optional
 - (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;
 - (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView;
+@optional
+- (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;
 @end
 ```
 
@@ -56,6 +62,12 @@ Sample code:
     // 'data' is the element of data source array which set in '-(NSArray*)dataSourceArrayForMarqueeView:'.
     UILabel *content = [itemView viewWithTag:1001];
     content.text = data;
+}
+
+- (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
+	// if 'touchEnabled' is 'YES', this will call back when touch on the item view.
+	// if you ever changed data source array, becareful in using the index.
+    NSLog(@"Touch at index %lu", (unsigned long)index);
 }
 ```
 
