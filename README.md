@@ -5,8 +5,8 @@ Customizable marquee view for iOS
 ![UUMarqueeView](https://raw.githubusercontent.com/iceyouyou/UUMarqueeView/master/extra/demo.gif)
 
 ## Revision History
-- 2017/06/20 Add touch event handler
-- 2016/12/08 Basic marquee view function
+- 2017/06/20 - Add touch event handler
+- 2016/12/08 - Basic marquee view function
 
 ## Usage
 Create the marquee view by:
@@ -65,8 +65,8 @@ Sample code:
 }
 
 - (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
-	// if 'touchEnabled' is 'YES', this will call back when touch on the item view.
-	// if you ever changed data source array, becareful in using the index.
+    // if 'touchEnabled' is 'YES', this will call back when touch on the item view.
+    // if you ever changed data source array, becareful in using the index.
     NSLog(@"Touch at index %lu", (unsigned long)index);
 }
 ```
