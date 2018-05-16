@@ -11,11 +11,13 @@
 
 @interface ViewController () <UUMarqueeViewDelegate>
 
-@property (nonatomic, strong) UUMarqueeView *simpleMarqueeView;
-@property (nonatomic, strong) UUMarqueeView *customMarqueeView;
+@property (nonatomic, strong) UUMarqueeView *upwardSingleMarqueeView;
+@property (nonatomic, strong) UUMarqueeView *upwardMultiMarqueeView;
+@property (nonatomic, strong) UUMarqueeView *leftwardMarqueeView;
 
-@property (nonatomic, strong) NSArray *simpleMarqueeViewData;
-@property (nonatomic, strong) NSArray *customMarqueeViewData;
+@property (nonatomic, strong) NSArray *upwardSingleMarqueeViewData;
+@property (nonatomic, strong) NSArray *upwardMultiMarqueeViewData;
+@property (nonatomic, strong) NSArray *leftwardMarqueeViewData;
 
 @end
 
@@ -26,93 +28,103 @@
 
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
 
-    // Simple Style
-    self.simpleMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 105.0f, screenWidth - 40.0f, 20.0f)];
-    _simpleMarqueeView.delegate = self;
-    _simpleMarqueeView.timeIntervalPerScroll = 2.0f;
-    _simpleMarqueeView.timeDurationPerScroll = 1.0f;
-    [self.view addSubview:_simpleMarqueeView];
-    [_simpleMarqueeView reloadData];
+    [self prepareDataSource];
 
-    // Custom Style
-    self.customMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 195.0f, screenWidth - 40.0f, 60.0f)];
-    _customMarqueeView.delegate = self;
-    _customMarqueeView.timeIntervalPerScroll = 1.0f;
-    _customMarqueeView.timeDurationPerScroll = 0.5f;
-    _customMarqueeView.touchEnabled = YES;
-    [self.view addSubview:_customMarqueeView];
-    [_customMarqueeView reloadData];
+    // Upward single line MarqueeView
+    self.upwardSingleMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 105.0f, screenWidth - 40.0f, 20.0f)];
+    _upwardSingleMarqueeView.delegate = self;
+    _upwardSingleMarqueeView.timeIntervalPerScroll = 2.0f;
+    _upwardSingleMarqueeView.timeDurationPerScroll = 1.0f;
+    [self.view addSubview:_upwardSingleMarqueeView];
+    [_upwardSingleMarqueeView reloadData];
 
+    // Upward multi line MarqueeView
+    self.upwardMultiMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 170.0f, screenWidth - 40.0f, 60.0f)];
+    _upwardMultiMarqueeView.delegate = self;
+    _upwardMultiMarqueeView.timeIntervalPerScroll = 1.0f;
+    _upwardMultiMarqueeView.timeDurationPerScroll = 0.5f;
+    _upwardMultiMarqueeView.touchEnabled = YES;
+    [self.view addSubview:_upwardMultiMarqueeView];
+    [_upwardMultiMarqueeView reloadData];
+
+    // Leftward MarqueeView
+    self.leftwardMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 300.0f, screenWidth - 40.0f, 20.0f) direction:UUMarqueeViewDirectionLeftward];
+    _leftwardMarqueeView.delegate = self;
+    _leftwardMarqueeView.timeIntervalPerScroll = 0.0f;
+    _leftwardMarqueeView.scrollSpeed = 60.0f;
+    _leftwardMarqueeView.itemSpacing = 20.0f;
+    [self.view addSubview:_leftwardMarqueeView];
+    [_leftwardMarqueeView reloadData];
+
+    // layout
     [self nothingImportant];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
 
-    if (_simpleMarqueeView) {
-        [_simpleMarqueeView start];
+    // something good for saving energy
+    if (_upwardSingleMarqueeView) {
+        [_upwardSingleMarqueeView start];
     }
-    if (_customMarqueeView) {
-        [_customMarqueeView start];
+    if (_upwardMultiMarqueeView) {
+        [_upwardMultiMarqueeView start];
+    }
+    if (_leftwardMarqueeView) {
+        [_leftwardMarqueeView start];
     }
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
 
-    if (_simpleMarqueeView) {
-        [_simpleMarqueeView pause];
+    // something good for saving energy
+    if (_upwardSingleMarqueeView) {
+        [_upwardSingleMarqueeView pause];
     }
-    if (_customMarqueeView) {
-        [_customMarqueeView pause];
+    if (_upwardMultiMarqueeView) {
+        [_upwardMultiMarqueeView pause];
+    }
+    if (_leftwardMarqueeView) {
+        [_leftwardMarqueeView pause];
     }
 }
 
 #pragma mark - UUMarqueeViewDelegate
-
 - (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
-    if (marqueeView == _simpleMarqueeView) {
-        // for simpleMarqueeView
+    if (marqueeView == _upwardSingleMarqueeView) {
+        // for upwardSingleMarqueeView
         return 1;
     } else {
-        // for customMarqueeView
+        // for upwardMultiMarqueeView
         return 3;
     }
 }
 
-- (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView {
-    if (marqueeView == _simpleMarqueeView) {
-        // for simpleMarqueeView
-        if (!_simpleMarqueeViewData) {
-            self.simpleMarqueeViewData = @[@"Do not go gentle into that good night,",
-                                       @"Old age should burn and rave at close of day;",
-                                       @"Rage, rage against the dying of the light."];
-        }
-        return _simpleMarqueeViewData;
+- (NSUInteger)numberOfDataForMarqueeView:(UUMarqueeView*)marqueeView {
+    if (marqueeView == _upwardSingleMarqueeView) {
+        // for upwardSingleMarqueeView
+        return _upwardSingleMarqueeViewData ? _upwardSingleMarqueeViewData.count : 0;
+    } else if (marqueeView == _upwardMultiMarqueeView) {
+        // for upwardMultiMarqueeView
+        return _upwardMultiMarqueeViewData ? _upwardMultiMarqueeViewData.count : 0;
     } else {
-        // for customMarqueeView
-        if (!_customMarqueeViewData) {
-            self.customMarqueeViewData = @[@{@"content":@"First snow at Forbidden City", @"time":@"10 seconds ago", @"icon":@"icon-1"},
-                                           @{@"content":@"Night view of Longmen Grottoes", @"time":@"12 minutes ago", @"icon":@"icon-2"},
-                                           @{@"content":@"Unexpected surprise for travelers", @"time":@"20 minutes ago", @"icon":@"icon-3"},
-                                           @{@"content":@"Drinking tea in outer space", @"time":@"1 hour ago", @"icon":@"icon-4"},
-                                           @{@"content":@"Food along the Silk Road", @"time":@"2 hour ago", @"icon":@"icon-5"}];
-        }
-        return _customMarqueeViewData;
+        // for leftwardMarqueeView
+        return _leftwardMarqueeViewData ? _leftwardMarqueeViewData.count : 0;
     }
 }
 
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView {
-    if (marqueeView == _simpleMarqueeView) {
-        // for simpleMarqueeView
+    if (marqueeView == _upwardSingleMarqueeView) {
+        // for upwardSingleMarqueeView
         itemView.backgroundColor = [UIColor colorWithRed:228.0f/255.0f green:228.0f/255.0f blue:228.0f/255.0f alpha:1.0f];
 
         UILabel *content = [[UILabel alloc] initWithFrame:itemView.bounds];
         content.font = [UIFont systemFontOfSize:10.0f];
         content.tag = 1001;
         [itemView addSubview:content];
-    } else {
-        // for customMarqueeView
+    } else if (marqueeView == _upwardMultiMarqueeView) {
+        // for upwardMultiMarqueeView
         itemView.backgroundColor = [UIColor colorWithRed:228.0f/255.0f green:228.0f/255.0f blue:228.0f/255.0f alpha:1.0f];
 
         UIImageView *icon = [[UIImageView alloc] initWithFrame:CGRectMake(5.0f, (CGRectGetHeight(itemView.bounds) - 16.0f) / 2.0f, 16.0f, 16.0f)];
@@ -129,32 +141,74 @@
         content.font = [UIFont systemFontOfSize:10.0f];
         content.tag = 1001;
         [itemView addSubview:content];
+    } else {
+        // for leftwardMarqueeView
+        itemView.backgroundColor = [UIColor colorWithRed:228.0f/255.0f green:228.0f/255.0f blue:228.0f/255.0f alpha:1.0f];
+
+        UIImageView *icon = [[UIImageView alloc] initWithFrame:CGRectMake(5.0f, (CGRectGetHeight(itemView.bounds) - 16.0f) / 2.0f, 16.0f, 16.0f)];
+        icon.tag = 1002;
+        [itemView addSubview:icon];
+
+        UILabel *content = [[UILabel alloc] initWithFrame:CGRectMake(5.0f + 16.0f + 5.0f, 0.0f, CGRectGetWidth(itemView.bounds) - 5.0f - 16.0f - 5.0f - 5.0f, CGRectGetHeight(itemView.bounds))];
+        content.font = [UIFont systemFontOfSize:10.0f];
+        content.tag = 1001;
+        [itemView addSubview:content];
     }
 }
 
-- (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView {
-    if (marqueeView == _simpleMarqueeView) {
-        // for simpleMarqueeView
+- (void)updateItemView:(UIView*)itemView atIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
+    if (marqueeView == _upwardSingleMarqueeView) {
+        // for upwardSingleMarqueeView
         UILabel *content = [itemView viewWithTag:1001];
-        content.text = data;
-    } else {
-        // for customMarqueeView
+        content.text = _upwardSingleMarqueeViewData[index];
+    } else if (marqueeView == _upwardMultiMarqueeView) {
+        // for upwardMultiMarqueeView
         UILabel *content = [itemView viewWithTag:1001];
-        content.text = [data objectForKey:@"content"];
+        content.text = [_upwardMultiMarqueeViewData[index] objectForKey:@"content"];
 
         UILabel *time = [itemView viewWithTag:1002];
-        time.text = [data objectForKey:@"time"];
+        time.text = [_upwardMultiMarqueeViewData[index] objectForKey:@"time"];
 
         UIImageView *icon = [itemView viewWithTag:1003];
-        icon.image = [UIImage imageNamed:[data objectForKey:@"icon"]];
+        icon.image = [UIImage imageNamed:[_upwardMultiMarqueeViewData[index] objectForKey:@"icon"]];
+    } else {
+        // for leftwardMarqueeView
+        UILabel *content = [itemView viewWithTag:1001];
+        content.text = _leftwardMarqueeViewData[index];
+
+        UIImageView *icon = [itemView viewWithTag:1002];
+        icon.image = [UIImage imageNamed:@"speaker"];
     }
+}
+
+- (CGFloat)itemWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
+    // for leftwardMarqueeView
+    UILabel *content = [[UILabel alloc] init];
+    content.font = [UIFont systemFontOfSize:10.0f];
+    content.text = _leftwardMarqueeViewData[index];
+    return (5.0f + 16.0f + 5.0f) + content.intrinsicContentSize.width;  // icon width + label width (it's perfect to cache them all)
 }
 
 - (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
-    NSLog(@"Touch at index %lu - \"%@\"", (unsigned long)index, [_customMarqueeViewData[index] objectForKey:@"content"]);
+    NSLog(@"Touch at index %lu - \"%@\"", (unsigned long)index, [_upwardMultiMarqueeViewData[index] objectForKey:@"content"]);
 }
 
 #pragma mark - Nothing Important
+- (void)prepareDataSource {
+    self.upwardSingleMarqueeViewData = @[@"Do not go gentle into that good night,",
+                                         @"Old age should burn and rave at close of day;",
+                                         @"Rage, rage against the dying of the light."];
+
+    self.upwardMultiMarqueeViewData = @[@{@"content":@"First snow at Forbidden City", @"time":@"10 seconds ago", @"icon":@"icon-1"},
+                                        @{@"content":@"Night view of Longmen Grottoes", @"time":@"12 minutes ago", @"icon":@"icon-2"},
+                                        @{@"content":@"Unexpected surprise for travelers", @"time":@"20 minutes ago", @"icon":@"icon-3"},
+                                        @{@"content":@"Drinking tea in outer space", @"time":@"1 hour ago", @"icon":@"icon-4"},
+                                        @{@"content":@"Food along the Silk Road", @"time":@"2 hour ago", @"icon":@"icon-5"}];
+
+    self.leftwardMarqueeViewData = @[@"Do not go gentle into that good night, Old age should burn and rave at close of day;",
+                                     @"Rage, rage against the dying of the light.",
+                                     @"Though wise men at their end know dark is right,"];
+}
 
 - (void)nothingImportant {
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
@@ -165,76 +219,107 @@
     title.font = [UIFont systemFontOfSize:14.0f];
     [self.view addSubview:title];
 
-    // Simple Style
-    UILabel *simpleTitle = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 80.0f, screenWidth - 40.0f, 20.0f)];
-    simpleTitle.text = @"Simple Style";
-    simpleTitle.font = [UIFont systemFontOfSize:12.0f];
-    [self.view addSubview:simpleTitle];
+    // Upward single line MarqueeView
+    UILabel *singleTitle = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 80.0f, screenWidth - 40.0f, 20.0f)];
+    singleTitle.text = @"Direction = Upward";
+    singleTitle.font = [UIFont systemFontOfSize:12.0f];
+    [self.view addSubview:singleTitle];
 
-    UIButton *simpleStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 130.0f, 50.0f, 20.0f)];
-    simpleStartBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
-    [simpleStartBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [simpleStartBtn setTitle:@"Start" forState:UIControlStateNormal];
-    simpleStartBtn.layer.cornerRadius = 4.0f;
-    simpleStartBtn.layer.borderWidth = 1.0f;
-    [self.view addSubview:simpleStartBtn];
-    [simpleStartBtn addTarget:self action:@selector(handleSimpleStartAction:) forControlEvents:UIControlEventTouchUpInside];
+    UIButton *singleStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 130.0f, 50.0f, 20.0f)];
+    singleStartBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [singleStartBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [singleStartBtn setTitle:@"Start" forState:UIControlStateNormal];
+    singleStartBtn.layer.cornerRadius = 4.0f;
+    singleStartBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:singleStartBtn];
+    [singleStartBtn addTarget:self action:@selector(handleSingleStartAction:) forControlEvents:UIControlEventTouchUpInside];
 
-    UIButton *simplePauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 130.0f, 50.0f, 20.0f)];
-    simplePauseBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
-    [simplePauseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [simplePauseBtn setTitle:@"Pause" forState:UIControlStateNormal];
-    simplePauseBtn.layer.cornerRadius = 4.0f;
-    simplePauseBtn.layer.borderWidth = 1.0f;
-    [self.view addSubview:simplePauseBtn];
-    [simplePauseBtn addTarget:self action:@selector(handleSimplePauseAction:) forControlEvents:UIControlEventTouchUpInside];
+    UIButton *singlePauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 130.0f, 50.0f, 20.0f)];
+    singlePauseBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [singlePauseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [singlePauseBtn setTitle:@"Pause" forState:UIControlStateNormal];
+    singlePauseBtn.layer.cornerRadius = 4.0f;
+    singlePauseBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:singlePauseBtn];
+    [singlePauseBtn addTarget:self action:@selector(handleSinglePauseAction:) forControlEvents:UIControlEventTouchUpInside];
 
-    // Custom Style
-    UILabel *customTitle = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 170.0f, screenWidth - 40.0f, 20.0f)];
-    customTitle.text = @"Custom Style";
-    customTitle.font = [UIFont systemFontOfSize:12.0f];
-    [self.view addSubview:customTitle];
+    // Upward multi line MarqueeView
+    UIButton *multiStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 235.0f, 50.0f, 20.0f)];
+    multiStartBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [multiStartBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [multiStartBtn setTitle:@"Start" forState:UIControlStateNormal];
+    multiStartBtn.layer.cornerRadius = 4.0f;
+    multiStartBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:multiStartBtn];
+    [multiStartBtn addTarget:self action:@selector(handleMultiStartAction:) forControlEvents:UIControlEventTouchUpInside];
 
-    UIButton *customStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 260.0f, 50.0f, 20.0f)];
-    customStartBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
-    [customStartBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [customStartBtn setTitle:@"Start" forState:UIControlStateNormal];
-    customStartBtn.layer.cornerRadius = 4.0f;
-    customStartBtn.layer.borderWidth = 1.0f;
-    [self.view addSubview:customStartBtn];
-    [customStartBtn addTarget:self action:@selector(handleCustomStartAction:) forControlEvents:UIControlEventTouchUpInside];
+    UIButton *multiPauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 235.0f, 50.0f, 20.0f)];
+    multiPauseBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [multiPauseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [multiPauseBtn setTitle:@"Pause" forState:UIControlStateNormal];
+    multiPauseBtn.layer.cornerRadius = 4.0f;
+    multiPauseBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:multiPauseBtn];
+    [multiPauseBtn addTarget:self action:@selector(handleMultiPauseAction:) forControlEvents:UIControlEventTouchUpInside];
 
-    UIButton *customPauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 260.0f, 50.0f, 20.0f)];
-    customPauseBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
-    [customPauseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [customPauseBtn setTitle:@"Pause" forState:UIControlStateNormal];
-    customPauseBtn.layer.cornerRadius = 4.0f;
-    customPauseBtn.layer.borderWidth = 1.0f;
-    [self.view addSubview:customPauseBtn];
-    [customPauseBtn addTarget:self action:@selector(handleCustomPauseAction:) forControlEvents:UIControlEventTouchUpInside];
+    // leftward MarqueeView
+    UILabel *leftwardTitle = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 275.0f, screenWidth - 40.0f, 20.0f)];
+    leftwardTitle.text = @"Direction = Leftward";
+    leftwardTitle.font = [UIFont systemFontOfSize:12.0f];
+    [self.view addSubview:leftwardTitle];
+
+    UIButton *leftwardStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 325.0f, 50.0f, 20.0f)];
+    leftwardStartBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [leftwardStartBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [leftwardStartBtn setTitle:@"Start" forState:UIControlStateNormal];
+    leftwardStartBtn.layer.cornerRadius = 4.0f;
+    leftwardStartBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:leftwardStartBtn];
+    [leftwardStartBtn addTarget:self action:@selector(handleLeftwardStartAction:) forControlEvents:UIControlEventTouchUpInside];
+
+    UIButton *leftwardPauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 325.0f, 50.0f, 20.0f)];
+    leftwardPauseBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [leftwardPauseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [leftwardPauseBtn setTitle:@"Pause" forState:UIControlStateNormal];
+    leftwardPauseBtn.layer.cornerRadius = 4.0f;
+    leftwardPauseBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:leftwardPauseBtn];
+    [leftwardPauseBtn addTarget:self action:@selector(handleLeftwardPauseAction:) forControlEvents:UIControlEventTouchUpInside];
 }
 
-- (void)handleSimpleStartAction:(id)sender {
-    if (_simpleMarqueeView) {
-        [_simpleMarqueeView start];
+- (void)handleSingleStartAction:(id)sender {
+    if (_upwardSingleMarqueeView) {
+        [_upwardSingleMarqueeView start];
     }
 }
 
-- (void)handleSimplePauseAction:(id)sender {
-    if (_simpleMarqueeView) {
-        [_simpleMarqueeView pause];
+- (void)handleSinglePauseAction:(id)sender {
+    if (_upwardSingleMarqueeView) {
+        [_upwardSingleMarqueeView pause];
     }
 }
 
-- (void)handleCustomStartAction:(id)sender {
-    if (_customMarqueeView) {
-        [_customMarqueeView start];
+- (void)handleMultiStartAction:(id)sender {
+    if (_upwardMultiMarqueeView) {
+        [_upwardMultiMarqueeView start];
     }
 }
 
-- (void)handleCustomPauseAction:(id)sender {
-    if (_customMarqueeView) {
-        [_customMarqueeView pause];
+- (void)handleMultiPauseAction:(id)sender {
+    if (_upwardMultiMarqueeView) {
+        [_upwardMultiMarqueeView pause];
+    }
+}
+
+- (void)handleLeftwardStartAction:(id)sender {
+    if (_leftwardMarqueeView) {
+        [_leftwardMarqueeView start];
+    }
+}
+
+- (void)handleLeftwardPauseAction:(id)sender {
+    if (_leftwardMarqueeView) {
+        [_leftwardMarqueeView pause];
     }
 }
 
