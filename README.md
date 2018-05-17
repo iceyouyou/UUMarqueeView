@@ -111,8 +111,8 @@ UUMarqueeViewDirectionLeftward  // 从右向左
 ```objective-c
 self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, 100.0f, 20.0f)];
 self.marqueeView.delegate = self;
-self.marqueeView.timeIntervalPerScroll = 2.0f;
-self.marqueeView.timeDurationPerScroll = 1.0f;
+self.marqueeView.timeIntervalPerScroll = 2.0f;	// 条目滑动间隔
+self.marqueeView.timeDurationPerScroll = 1.0f;	// 条目滑动时间
 self.marqueeView.touchEnabled = YES;	// 设置为YES可监听点击事件，默认值为NO
 [self.view addSubview:self.marqueeView];
 [self.marqueeView reloadData];
@@ -122,8 +122,8 @@ self.marqueeView.touchEnabled = YES;	// 设置为YES可监听点击事件，默�
 ```objective-c
 self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, 100.0f, 20.0f) direction:UUMarqueeViewDirectionLeftward];
 self.marqueeView.delegate = self;
-self.marqueeView.timeIntervalPerScroll = 0.0f;
-self.marqueeView.scrollSpeed = 60.0f;
+self.marqueeView.timeIntervalPerScroll = 0.0f;	// 条目滑动间隔
+self.marqueeView.scrollSpeed = 60.0f;	// 滑动速度
 self.marqueeView.itemSpacing = 20.0f;	// 左右相邻两个条目的间距，当左侧条目内容的长度超出marquee view整体长度时有效
 self.marqueeView.touchEnabled = YES;	// 设置为YES可监听点击事件，默认值为NO
 [self.view addSubview:self.marqueeView];
