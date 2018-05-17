@@ -14,7 +14,6 @@
 		24DC05D71DF811AC003820A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24DC05D61DF811AC003820A1 /* Assets.xcassets */; };
 		24DC05DA1DF811AC003820A1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 24DC05D81DF811AC003820A1 /* LaunchScreen.storyboard */; };
 		24DC05EC1DF93879003820A1 /* UUMarqueeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DC05EB1DF93879003820A1 /* UUMarqueeView.m */; };
-		24DC05F01DF94A8E003820A1 /* MSWeakTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DC05EF1DF94A8E003820A1 /* MSWeakTimer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,8 +29,6 @@
 		24DC05DB1DF811AC003820A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		24DC05EA1DF93879003820A1 /* UUMarqueeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UUMarqueeView.h; sourceTree = "<group>"; };
 		24DC05EB1DF93879003820A1 /* UUMarqueeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UUMarqueeView.m; sourceTree = "<group>"; };
-		24DC05EE1DF94A8E003820A1 /* MSWeakTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSWeakTimer.h; sourceTree = "<group>"; };
-		24DC05EF1DF94A8E003820A1 /* MSWeakTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSWeakTimer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,7 +45,6 @@
 		24DC05BE1DF811AC003820A1 = {
 			isa = PBXGroup;
 			children = (
-				24DC05ED1DF94A8E003820A1 /* MSWeakTimer */,
 				24DC05E91DF93879003820A1 /* UUMarqueeView */,
 				24DC05C91DF811AC003820A1 /* UUMarqueeViewDemo */,
 				24DC05C81DF811AC003820A1 /* Products */,
@@ -94,15 +90,6 @@
 				24DC05EB1DF93879003820A1 /* UUMarqueeView.m */,
 			);
 			path = UUMarqueeView;
-			sourceTree = "<group>";
-		};
-		24DC05ED1DF94A8E003820A1 /* MSWeakTimer */ = {
-			isa = PBXGroup;
-			children = (
-				24DC05EE1DF94A8E003820A1 /* MSWeakTimer.h */,
-				24DC05EF1DF94A8E003820A1 /* MSWeakTimer.m */,
-			);
-			path = MSWeakTimer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -177,7 +164,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				24DC05EC1DF93879003820A1 /* UUMarqueeView.m in Sources */,
-				24DC05F01DF94A8E003820A1 /* MSWeakTimer.m in Sources */,
 				24DC05D21DF811AC003820A1 /* ViewController.m in Sources */,
 				24DC05CF1DF811AC003820A1 /* AppDelegate.m in Sources */,
 				24DC05CC1DF811AC003820A1 /* main.m in Sources */,
