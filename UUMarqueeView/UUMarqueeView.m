@@ -226,15 +226,11 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         return;
     }
 
-    if (!afterTimeInterval) {
-        [self scrollTimerDidFire:nil];
-    } else {
-        self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:_timeIntervalPerScroll
-                                                            target:self
-                                                          selector:@selector(scrollTimerDidFire:)
-                                                          userInfo:nil
-                                                           repeats:NO];
-    }
+    self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:afterTimeInterval ? _timeIntervalPerScroll : 0.0
+                                                        target:self
+                                                      selector:@selector(scrollTimerDidFire:)
+                                                      userInfo:nil
+                                                       repeats:NO];
 }
 
 - (void)scrollTimerDidFire:(NSTimer *)timer {
