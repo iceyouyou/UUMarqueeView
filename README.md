@@ -1,5 +1,5 @@
 # UUMarqueeView
-Customizable marquee view for iOS
+Customizable marquee view for iOS. [English](##Usage)/[中文](##License)
 
 ## Demo
 ![UUMarqueeView](https://raw.githubusercontent.com/iceyouyou/UUMarqueeView/master/extra/demo.gif)
