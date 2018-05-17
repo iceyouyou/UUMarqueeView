@@ -13,7 +13,7 @@
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, assign) NSInteger visibleItemCount;
 @property (nonatomic, strong) NSMutableArray<UIView*> *items;
-@property (nonatomic, assign) int topItemIndex;
+@property (nonatomic, assign) int firstItemIndex;
 @property (nonatomic, assign) int dataIndex;
 @property (nonatomic, strong) NSTimer *scrollTimer;
 @property (nonatomic, strong) UUMarqueeViewTouchReceiver *touchReceiver;
@@ -118,7 +118,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 #pragma mark - ItemView(private)
 - (void)resetAll {
     self.dataIndex = -1;
-    self.topItemIndex = 0;
+    self.firstItemIndex = 0;
 
     if (_items) {
         [_items makeObjectsPerformSelector:@selector(removeFromSuperview)];
@@ -149,7 +149,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
     [self repositionItemViews];
 
     for (int i = 0; i < _items.count; i++) {
-        int index = (i + _topItemIndex) % _items.count;
+        int index = (i + _firstItemIndex) % _items.count;
         if (i == 0) {
             if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
                 [_delegate createItemView:_items[index] forMarqueeView:self];
@@ -175,12 +175,12 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         CGFloat itemHeight = CGRectGetHeight(self.frame) / _visibleItemCount;
         CGFloat lastMaxX = 0.0f;
         for (int i = 0; i < _items.count; i++) {
-            int index = (i + _topItemIndex) % _items.count;
+            int index = (i + _firstItemIndex) % _items.count;
 
             CGFloat itemWidth = CGRectGetWidth(self.frame);
             if (_items[index].tag != -1) {
-                if ([_delegate respondsToSelector:@selector(itemWidthAtIndex:forMarqueeView:)]) {
-                    itemWidth = MAX([_delegate itemWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
+                if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
+                    itemWidth = MAX([_delegate itemViewWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
                 }
             }
 
@@ -196,7 +196,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         CGFloat itemWidth = CGRectGetWidth(self.frame);
         CGFloat itemHeight = CGRectGetHeight(self.frame) / _visibleItemCount;
         for (int i = 0; i < _items.count; i++) {
-            int index = (i + _topItemIndex) % _items.count;
+            int index = (i + _firstItemIndex) % _items.count;
             if (i == 0) {
                 [_items[index] setFrame:CGRectMake(0.0f, -itemHeight, itemWidth, itemHeight)];
             } else if (i == _items.count - 1) {
@@ -209,14 +209,14 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 - (int)itemIndexWithOffsetFromTop:(int)offsetFromTop {
-    return (_topItemIndex + offsetFromTop) % (_visibleItemCount + 2);
+    return (_firstItemIndex + offsetFromTop) % (_visibleItemCount + 2);
 }
 
 - (void)moveToNextItemIndex {
-    if (_topItemIndex >= _items.count - 1) {
-        self.topItemIndex = 0;
+    if (_firstItemIndex >= _items.count - 1) {
+        self.firstItemIndex = 0;
     } else {
-        self.topItemIndex++;
+        self.firstItemIndex++;
     }
 }
 
@@ -250,12 +250,12 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             CGFloat currentItemWidth = CGRectGetWidth(self.frame);
             CGFloat lastItemWidth = CGRectGetWidth(self.frame);
             for (int i = 0; i < _items.count; i++) {
-                int index = (i + _topItemIndex) % _items.count;
+                int index = (i + _firstItemIndex) % _items.count;
 
                 CGFloat itemWidth = CGRectGetWidth(self.frame);
                 if (_items[index].tag != -1) {
-                    if ([_delegate respondsToSelector:@selector(itemWidthAtIndex:forMarqueeView:)]) {
-                        itemWidth = MAX([_delegate itemWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
+                    if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
+                        itemWidth = MAX([_delegate itemViewWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
                     }
                 }
                 lastItemWidth = itemWidth;
@@ -270,21 +270,21 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             }
 
             // move the top item to bottom without animation
-            _items[_topItemIndex].tag = _dataIndex;
-            [_items[_topItemIndex] setFrame:CGRectMake(lastItemWidth, 0.0f, firstItemWidth, itemHeight)];
+            _items[_firstItemIndex].tag = _dataIndex;
+            [_items[_firstItemIndex] setFrame:CGRectMake(lastItemWidth, 0.0f, firstItemWidth, itemHeight)];
             if ([_delegate respondsToSelector:@selector(updateItemView:atIndex:forMarqueeView:)]) {
-                [_delegate updateItemView:_items[_topItemIndex] atIndex:_items[_topItemIndex].tag forMarqueeView:self];
+                [_delegate updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag forMarqueeView:self];
             }
 
             [UIView animateWithDuration:(currentItemWidth / _scrollSpeed) delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
                 CGFloat lastMaxX = 0.0f;
                 for (int i = 0; i < _items.count; i++) {
-                    int index = (i + _topItemIndex) % _items.count;
+                    int index = (i + _firstItemIndex) % _items.count;
 
                     CGFloat itemWidth = CGRectGetWidth(self.frame);
                     if (_items[index].tag != -1) {
-                        if ([_delegate respondsToSelector:@selector(itemWidthAtIndex:forMarqueeView:)]) {
-                            itemWidth = MAX([_delegate itemWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
+                        if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
+                            itemWidth = MAX([_delegate itemViewWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
                         }
                     }
 
@@ -314,15 +314,15 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             CGFloat itemHeight = CGRectGetHeight(self.frame) / _visibleItemCount;
 
             // move the top item to bottom without animation
-            _items[_topItemIndex].tag = _dataIndex;
-            [_items[_topItemIndex] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, itemHeight)];
+            _items[_firstItemIndex].tag = _dataIndex;
+            [_items[_firstItemIndex] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, itemHeight)];
             if ([_delegate respondsToSelector:@selector(updateItemView:atIndex:forMarqueeView:)]) {
-                [_delegate updateItemView:_items[_topItemIndex] atIndex:_items[_topItemIndex].tag forMarqueeView:self];
+                [_delegate updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag forMarqueeView:self];
             }
 
             [UIView animateWithDuration:_timeDurationPerScroll animations:^{
                 for (int i = 0; i < _items.count; i++) {
-                    int index = (i + _topItemIndex) % _items.count;
+                    int index = (i + _firstItemIndex) % _items.count;
                     if (i == 0) {
                         continue;
                     } else if (i == 1) {

@@ -21,8 +21,8 @@ typedef NS_ENUM(NSUInteger, UUMarqueeViewDirection) {
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)updateItemView:(UIView*)itemView atIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;
 @optional
-- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;   // only for Upward direction
-- (CGFloat)itemWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;   // only for Leftward direction
+- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;   // only for [UUMarqueeViewDirectionUpward]
+- (CGFloat)itemViewWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;   // only for [UUMarqueeViewDirectionLeftward]
 - (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;
 @end
 

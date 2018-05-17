@@ -181,7 +181,7 @@
     }
 }
 
-- (CGFloat)itemWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
+- (CGFloat)itemViewWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
     // for leftwardMarqueeView
     UILabel *content = [[UILabel alloc] init];
     content.font = [UIFont systemFontOfSize:10.0f];

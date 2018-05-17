@@ -5,11 +5,18 @@ Customizable marquee view for iOS
 ![UUMarqueeView](https://raw.githubusercontent.com/iceyouyou/UUMarqueeView/master/extra/demo.gif)
 
 ## Revision History
+- 2018/05/16 - Add leftward scrolling support
 - 2017/06/20 - Add touch event handler
 - 2016/12/08 - Basic marquee view function
 
 ## Usage
-Create the marquee view by:
+There are two scroll directions for a marquee view:
+```objective-c
+UUMarqueeViewDirectionUpward,   // scroll from bottom to top
+UUMarqueeViewDirectionLeftward  // scroll from right to left
+```
+
+Create a upward scrolling marquee view by:
 ```objective-c
 self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, CGRectGetWidth(self.view.bounds) - 40.0f, 20.0f)];
 self.marqueeView.delegate = self;
@@ -20,14 +27,27 @@ self.marqueeView.touchEnabled = YES;	// Set YES if you want to handle touch even
 [self.marqueeView reloadData];
 ```
 
+Or a leftward scrolling marquee view by:
+```objective-c
+self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, CGRectGetWidth(self.view.bounds) - 40.0f, 20.0f) direction:UUMarqueeViewDirectionLeftward];
+self.marqueeView.delegate = self;
+self.marqueeView.timeIntervalPerScroll = 0.0f;
+self.marqueeView.scrollSpeed = 60.0f;
+self.marqueeView.itemSpacing = 20.0f;	// the minimum spacing between items
+self.marqueeView.touchEnabled = YES;	// Set YES if you want to handle touch event. Default is NO.
+[self.view addSubview:self.marqueeView];
+[self.marqueeView reloadData];
+```
+
 Then implement `UUMarqueeViewDelegate` protocol:
 ```objective-c
 @protocol UUMarqueeViewDelegate <NSObject>
-- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;
-- (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView;
+- (NSUInteger)numberOfDataForMarqueeView:(UUMarqueeView*)marqueeView;
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView;
-- (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView;
+- (void)updateItemView:(UIView*)itemView atIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;
 @optional
+- (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;   // only for [UUMarqueeViewDirectionUpward]
+- (CGFloat)itemViewWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;   // only for [UUMarqueeViewDirectionLeftward]
 - (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;
 @end
 ```
@@ -35,33 +55,42 @@ Then implement `UUMarqueeViewDelegate` protocol:
 Sample code:
 ```objective-c
 - (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
+	// this will be called only when direction is [UUMarqueeViewDirectionUpward].
     // set a row count that you want to display.
     return 1;
 }
 
-- (NSArray*)dataSourceArrayForMarqueeView:(UUMarqueeView*)marqueeView {
-    // set an array that contains all data you want to show.
-    // you can set an array variable as well and change it's content at any time.
-    return @[@"Data A",
-             @"Data B",
-             @"Data C"];
+- (NSUInteger)numberOfDataForMarqueeView:(UUMarqueeView*)marqueeView {
+    // the count of data source array.
+    // For example: if data source is @[@"A", @"B", @"C"]; then return 3.
+    return 3;
 }
 
 - (void)createItemView:(UIView*)itemView forMarqueeView:(UUMarqueeView*)marqueeView {
     // add any subviews you want but do not set any content.
     // this will be called to create every row view in '-(void)reloadData'.
-    // ### give a tag on all of your changeable subviews then you can find it later.
+    // ### give a tag on all of your changeable subviews then you can find it later(updateItemView:withData:forMarqueeView:).
     UILabel *content = [[UILabel alloc] initWithFrame:itemView.bounds];
     content.font = [UIFont systemFontOfSize:10.0f];
     content.tag = 1001;
     [itemView addSubview:content];
 }
 
-- (void)updateItemView:(UIView*)itemView withData:(id)data forMarqueeView:(UUMarqueeView*)marqueeView {
+- (void)updateItemView:(UIView*)itemView atIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
     // set content to subviews, this will be called on each time the MarqueeView scrolls.
-    // 'data' is the element of data source array which set in '-(NSArray*)dataSourceArrayForMarqueeView:'.
+    // 'index' is the index of data source array.
     UILabel *content = [itemView viewWithTag:1001];
-    content.text = data;
+    content.text = dataSource[index];
+}
+
+- (CGFloat)itemViewWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
+	// this will be called only when direction is [UUMarqueeViewDirectionLeftward].
+	// give the width of item view when the data source setup.
+	// is good to cache the width once and reuse it in next time. if you do so, remember to clear the cache when you chang the data source array.
+	UILabel *content = [[UILabel alloc] init];
+    content.font = [UIFont systemFontOfSize:10.0f];
+    content.text = dataSource[index];
+    return content.intrinsicContentSize.width;
 }
 
 - (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
@@ -80,4 +109,4 @@ Using NSWeakTimer to avoid retain cycle problem.
 MSWeakTimer Github page: https://github.com/mindsnacks/MSWeakTimer
 
 ## License
-`UUMarqueeView` is available under the MIT license. See the LICENSE file for more info.
+`UUMarqueeView` is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
