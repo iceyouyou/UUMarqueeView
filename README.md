@@ -18,7 +18,7 @@ UUMarqueeViewDirectionLeftward  // scroll from right to left
 
 Create a upward scrolling marquee view by:
 ```objective-c
-self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, CGRectGetWidth(self.view.bounds) - 40.0f, 20.0f)];
+self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, 100.0f, 20.0f)];
 self.marqueeView.delegate = self;
 self.marqueeView.timeIntervalPerScroll = 2.0f;
 self.marqueeView.timeDurationPerScroll = 1.0f;
@@ -29,7 +29,7 @@ self.marqueeView.touchEnabled = YES;	// Set YES if you want to handle touch even
 
 Or a leftward scrolling marquee view by:
 ```objective-c
-self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, CGRectGetWidth(self.view.bounds) - 40.0f, 20.0f) direction:UUMarqueeViewDirectionLeftward];
+self.marqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 40.0f, 100.0f, 20.0f) direction:UUMarqueeViewDirectionLeftward];
 self.marqueeView.delegate = self;
 self.marqueeView.timeIntervalPerScroll = 0.0f;
 self.marqueeView.scrollSpeed = 60.0f;
@@ -55,7 +55,7 @@ Then implement `UUMarqueeViewDelegate` protocol:
 Sample code:
 ```objective-c
 - (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView {
-	// this will be called only when direction is [UUMarqueeViewDirectionUpward].
+    // this will be called only when direction is [UUMarqueeViewDirectionUpward].
     // set a row count that you want to display.
     return 1;
 }
@@ -84,10 +84,10 @@ Sample code:
 }
 
 - (CGFloat)itemViewWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
-	// this will be called only when direction is [UUMarqueeViewDirectionLeftward].
-	// give the width of item view when the data source setup.
-	// is good to cache the width once and reuse it in next time. if you do so, remember to clear the cache when you chang the data source array.
-	UILabel *content = [[UILabel alloc] init];
+    // this will be called only when direction is [UUMarqueeViewDirectionLeftward].
+    // give the width of item view when the data source setup.
+    // is good to cache the width once and reuse it in next time. if you do so, remember to clear the cache when you chang the data source array.
+    UILabel *content = [[UILabel alloc] init];
     content.font = [UIFont systemFontOfSize:10.0f];
     content.text = dataSource[index];
     return content.intrinsicContentSize.width;
@@ -103,10 +103,6 @@ Sample code:
 ## Compatibility
 - Requires ARC.
 - Supports iOS7+.
-
-## Additional
-Using NSWeakTimer to avoid retain cycle problem.  
-MSWeakTimer Github page: https://github.com/mindsnacks/MSWeakTimer
 
 ## License
 `UUMarqueeView` is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
