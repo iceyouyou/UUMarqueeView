@@ -7,7 +7,6 @@
 //
 
 #import "UUMarqueeView.h"
-#import "MSWeakTimer.h"
 
 @interface UUMarqueeView () <UUMarqueeViewTouchResponder>
 
@@ -16,7 +15,7 @@
 @property (nonatomic, strong) NSMutableArray<UIView*> *items;
 @property (nonatomic, assign) int topItemIndex;
 @property (nonatomic, assign) int dataIndex;
-@property (nonatomic, strong) MSWeakTimer *scrollTimer;
+@property (nonatomic, strong) NSTimer *scrollTimer;
 @property (nonatomic, strong) UUMarqueeViewTouchReceiver *touchReceiver;
 
 @end
@@ -79,19 +78,11 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 - (void)reloadData {
     [self pause];
     [self resetAll];
-    if (_direction == UUMarqueeViewDirectionLeftward) {
-        [self startAfterTimeInterval:YES repeats:NO];
-    } else {
-        [self startAfterTimeInterval:YES repeats:YES];
-    }
+    [self startAfterTimeInterval:YES];
 }
 
 - (void)start {
-    if (_direction == UUMarqueeViewDirectionLeftward) {
-        [self startAfterTimeInterval:NO repeats:NO];
-    } else {
-        [self startAfterTimeInterval:NO repeats:YES];
-    }
+    [self startAfterTimeInterval:NO];
 }
 
 - (void)pause {
@@ -102,10 +93,8 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 - (void)repeat {
-    if (_direction == UUMarqueeViewDirectionLeftward) {
-        [self pause];
-        [self startAfterTimeInterval:YES repeats:NO];
-    }
+    [self pause];
+    [self startAfterTimeInterval:YES];
 }
 
 #pragma mark - Override(private)
@@ -232,23 +221,23 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 #pragma mark - Timer & Animation(private)
-- (void)startAfterTimeInterval:(BOOL)afterTimeInterval repeats:(BOOL)repeats {
+- (void)startAfterTimeInterval:(BOOL)afterTimeInterval {
     if (_scrollTimer || _items.count <= 0) {
         return;
     }
 
-    if (!afterTimeInterval && _timeIntervalPerScroll > 0) {
+    if (!afterTimeInterval) {
         [self scrollTimerDidFire:nil];
-    }
-    self.scrollTimer = [MSWeakTimer scheduledTimerWithTimeInterval:_timeIntervalPerScroll
+    } else {
+        self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:_timeIntervalPerScroll
                                                             target:self
                                                           selector:@selector(scrollTimerDidFire:)
                                                           userInfo:nil
-                                                           repeats:repeats
-                                                     dispatchQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
+                                                           repeats:NO];
+    }
 }
 
-- (void)scrollTimerDidFire:(MSWeakTimer *)timer {
+- (void)scrollTimerDidFire:(NSTimer *)timer {
     dispatch_async(dispatch_get_main_queue(), ^() {
         if (_direction == UUMarqueeViewDirectionLeftward) {
             [self moveToNextDataIndex];
@@ -341,6 +330,10 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     } else {
                         [_items[index] setFrame:CGRectMake(0.0f, itemHeight * (i - 2), itemWidth, itemHeight)];
                     }
+                }
+            } completion:^(BOOL finished) {
+                if (finished && _scrollTimer) {
+                    [self repeat];
                 }
             }];
             [self moveToNextItemIndex];
