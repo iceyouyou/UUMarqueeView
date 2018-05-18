@@ -295,7 +295,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     }
                 }
             } completion:^(BOOL finished) {
-                if (finished && _scrollTimer) {
+                if (_scrollTimer) {
                     [self repeat];
                 }
             }];
@@ -328,7 +328,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     }
                 }
             } completion:^(BOOL finished) {
-                if (finished && _scrollTimer) {
+                if (_scrollTimer) {
                     [self repeat];
                 }
             }];
