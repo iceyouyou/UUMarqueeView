@@ -205,9 +205,10 @@
                                         @{@"content":@"Drinking tea in outer space", @"time":@"1 hour ago", @"icon":@"icon-4"},
                                         @{@"content":@"Food along the Silk Road", @"time":@"2 hour ago", @"icon":@"icon-5"}];
 
-    self.leftwardMarqueeViewData = @[@"Do not go gentle into that good night, Old age should burn and rave at close of day;",
-                                     @"Rage, rage against the dying of the light.",
-                                     @"Though wise men at their end know dark is right,"];
+    self.leftwardMarqueeViewData = @[@"Do not go gentle into that good night,",
+                                     @"Old age should burn and rave at close of day; Rage, rage against the dying of the light.",
+                                     @"Though wise men at their end know dark is right, Because their words had forked no lightning they Do not go gentle into that good night.",
+                                     @"Good men, the last wave by, crying how bright"];
 }
 
 - (void)nothingImportant {
