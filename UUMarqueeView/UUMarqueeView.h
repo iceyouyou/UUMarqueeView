@@ -33,6 +33,7 @@ typedef NS_ENUM(NSUInteger, UUMarqueeViewDirection) {
 @property (nonatomic, assign) NSTimeInterval timeDurationPerScroll; // only for [UUMarqueeViewDirectionUpward]
 @property (nonatomic, assign) float scrollSpeed;    // only for [UUMarqueeViewDirectionLeftward]
 @property (nonatomic, assign) float itemSpacing;    // only for [UUMarqueeViewDirectionLeftward]
+@property (nonatomic, assign) BOOL stopWhenLessData;  // do not scroll when all data has been shown
 @property (nonatomic, assign) BOOL clipsToBounds;
 @property (nonatomic, assign, getter=isTouchEnabled) BOOL touchEnabled;
 @property (nonatomic, assign) UUMarqueeViewDirection direction;
@@ -51,4 +52,11 @@ typedef NS_ENUM(NSUInteger, UUMarqueeViewDirection) {
 #pragma mark - UUMarqueeViewTouchReceiver(Private)
 @interface UUMarqueeViewTouchReceiver : UIView
 @property (nonatomic, weak) id<UUMarqueeViewTouchResponder> touchDelegate;
+@end
+
+#pragma mark - UUMarqueeItemView(Private)
+@interface UUMarqueeItemView : UIView   // UUMarqueeItemView's [tag] is the index of data source. if none data source then [tag] is -1
+@property (nonatomic, assign) BOOL didFinishCreate;
+@property (nonatomic, assign) CGFloat width;        // cache the item width, only for [UUMarqueeViewDirectionUpward]
+- (void)clear;
 @end

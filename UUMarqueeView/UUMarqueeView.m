@@ -12,7 +12,7 @@
 
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, assign) NSInteger visibleItemCount;
-@property (nonatomic, strong) NSMutableArray<UIView*> *items;
+@property (nonatomic, strong) NSMutableArray<UUMarqueeItemView*> *items;
 @property (nonatomic, assign) int firstItemIndex;
 @property (nonatomic, assign) int dataIndex;
 @property (nonatomic, strong) NSTimer *scrollTimer;
@@ -43,6 +43,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         _scrollSpeed = DEFAULT_SCROLL_SPEED;
         _itemSpacing = DEFAULT_ITEM_SPACING;
         _touchEnabled = NO;
+        _stopWhenLessData = NO;
 
         _contentView = [[UIView alloc] initWithFrame:self.bounds];
         _contentView.clipsToBounds = YES;
@@ -58,6 +59,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         _scrollSpeed = DEFAULT_SCROLL_SPEED;
         _itemSpacing = DEFAULT_ITEM_SPACING;
         _touchEnabled = NO;
+        _stopWhenLessData = NO;
 
         _contentView = [[UIView alloc] initWithFrame:self.bounds];
         _contentView.clipsToBounds = YES;
@@ -141,7 +143,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
     }
 
     for (int i = 0; i < _visibleItemCount + 2; i++) {
-        UIView *itemView = [[UIView alloc] init];
+        UUMarqueeItemView *itemView = [[UUMarqueeItemView alloc] init];
         [_contentView addSubview:itemView];
         [_items addObject:itemView];
     }
@@ -157,27 +159,17 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                 [_items[index] setFrame:CGRectMake(-itemWidth, 0.0f, itemWidth, itemHeight)];
                 lastMaxX = 0.0f;
 
-                if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
-                    [_delegate createItemView:_items[index] forMarqueeView:self];
-                }
+                [self createItemView:_items[index]];
             } else  {
                 [self moveToNextDataIndex];
                 _items[index].tag = _dataIndex;
-
-                if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
-                    itemWidth = MAX([_delegate itemViewWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
-                }
+                _items[index].width = [self itemWidthAtIndex:_items[index].tag];
+                itemWidth = MAX(_items[index].width + DEFAULT_ITEM_SPACING, itemWidth);
 
                 [_items[index] setFrame:CGRectMake(lastMaxX, 0.0f, itemWidth, itemHeight)];
                 lastMaxX = lastMaxX + itemWidth;
 
-                if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
-                    [_delegate createItemView:_items[index] forMarqueeView:self];
-                }
-
-                if ([_delegate respondsToSelector:@selector(updateItemView:atIndex:forMarqueeView:)]) {
-                    [_delegate updateItemView:_items[index] atIndex:_items[index].tag forMarqueeView:self];
-                }
+                [self updateItemView:_items[index] atIndex:_items[index].tag];
             }
         }
     } else {
@@ -186,19 +178,13 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         for (int i = 0; i < _items.count; i++) {
             int index = (i + _firstItemIndex) % _items.count;
             if (i == 0) {
-                if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
-                    [_delegate createItemView:_items[index] forMarqueeView:self];
-                }
+                [self createItemView:_items[index]];
                 _items[index].tag = _dataIndex;
             } else  {
-                if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
-                    [_delegate createItemView:_items[index] forMarqueeView:self];
-                }
                 [self moveToNextDataIndex];
                 _items[index].tag = _dataIndex;
-                if ([_delegate respondsToSelector:@selector(updateItemView:atIndex:forMarqueeView:)]) {
-                    [_delegate updateItemView:_items[index] atIndex:_items[index].tag forMarqueeView:self];
-                }
+
+                [self updateItemView:_items[index] atIndex:_items[index].tag];
             }
         }
     }
@@ -213,12 +199,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         for (int i = 0; i < _items.count; i++) {
             int index = (i + _firstItemIndex) % _items.count;
 
-            CGFloat itemWidth = CGRectGetWidth(self.frame);
-            if (_items[index].tag != -1) {
-                if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
-                    itemWidth = MAX([_delegate itemViewWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
-                }
-            }
+            CGFloat itemWidth = MAX(_items[index].width + DEFAULT_ITEM_SPACING, CGRectGetWidth(self.frame));
 
             if (i == 0) {
                 [_items[index] setFrame:CGRectMake(-itemWidth, 0.0f, itemWidth, itemHeight)];
@@ -256,6 +237,44 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
     }
 }
 
+- (CGFloat)itemWidthAtIndex:(NSInteger)index {
+    CGFloat itemWidth = 0.0f;
+    if (index >= 0) {
+        if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
+            itemWidth = [_delegate itemViewWidthAtIndex:index forMarqueeView:self];
+        }
+    }
+    return itemWidth;
+}
+
+- (void)createItemView:(UUMarqueeItemView*)itemView {
+    if (!itemView.didFinishCreate) {
+        if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
+            [_delegate createItemView:itemView forMarqueeView:self];
+            itemView.didFinishCreate = YES;
+        }
+    }
+}
+
+- (void)updateItemView:(UUMarqueeItemView*)itemView atIndex:(NSInteger)index {
+    if (index < 0) {
+        [itemView clear];
+    }
+
+    if (!itemView.didFinishCreate) {
+        if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
+            [_delegate createItemView:itemView forMarqueeView:self];
+            itemView.didFinishCreate = YES;
+        }
+    }
+
+    if (index >= 0) {
+        if ([_delegate respondsToSelector:@selector(updateItemView:atIndex:forMarqueeView:)]) {
+            [_delegate updateItemView:itemView atIndex:index forMarqueeView:self];
+        }
+    }
+}
+
 #pragma mark - Timer & Animation(private)
 - (void)startAfterTimeInterval:(BOOL)afterTimeInterval {
     if (_scrollTimer || _items.count <= 0) {
@@ -270,12 +289,37 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 - (void)scrollTimerDidFire:(NSTimer *)timer {
+    if (_stopWhenLessData) {
+        NSUInteger dataCount = 0;
+        if ([_delegate respondsToSelector:@selector(numberOfDataForMarqueeView:)]) {
+            dataCount = [_delegate numberOfDataForMarqueeView:self];
+        }
+        if (_direction == UUMarqueeViewDirectionLeftward) {
+            if (dataCount <= 1) {
+                CGFloat itemWidth = MAX(_items[1].width + DEFAULT_ITEM_SPACING, CGRectGetWidth(self.frame));
+                if (itemWidth <= CGRectGetWidth(self.frame)) {
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_timeDurationPerScroll * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                        if (_scrollTimer) {
+                            [self repeat];
+                        }
+                    });
+                    return;
+                }
+            }
+        } else {
+            if (dataCount <= _visibleItemCount) {
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_timeDurationPerScroll * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    if (_scrollTimer) {
+                        [self repeat];
+                    }
+                });
+                return;
+            }
+        }
+    }
     dispatch_async(dispatch_get_main_queue(), ^() {
         if (_direction == UUMarqueeViewDirectionLeftward) {
             [self moveToNextDataIndex];
-            if (_dataIndex < 0) {
-                return;
-            }
 
             CGFloat itemHeight = CGRectGetHeight(self.frame);
             CGFloat firstItemWidth = CGRectGetWidth(self.frame);
@@ -284,12 +328,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             for (int i = 0; i < _items.count; i++) {
                 int index = (i + _firstItemIndex) % _items.count;
 
-                CGFloat itemWidth = CGRectGetWidth(self.frame);
-                if (_items[index].tag != -1) {
-                    if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
-                        itemWidth = MAX([_delegate itemViewWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
-                    }
-                }
+                CGFloat itemWidth = MAX(_items[index].width + DEFAULT_ITEM_SPACING, CGRectGetWidth(self.frame));
 
                 if (i == 0) {
                     firstItemWidth = itemWidth;
@@ -302,33 +341,21 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 
             // move the top item to bottom without animation
             _items[_firstItemIndex].tag = _dataIndex;
-            CGFloat nextItemWidth = CGRectGetWidth(self.frame);
-            if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
-                nextItemWidth = MAX([_delegate itemViewWidthAtIndex:_items[_firstItemIndex].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, nextItemWidth);
-            }
+            _items[_firstItemIndex].width = [self itemWidthAtIndex:_items[_firstItemIndex].tag];
+            CGFloat nextItemWidth = MAX(_items[_firstItemIndex].width + DEFAULT_ITEM_SPACING, CGRectGetWidth(self.frame));
             [_items[_firstItemIndex] setFrame:CGRectMake(lastItemWidth, 0.0f, nextItemWidth, itemHeight)];
             if (firstItemWidth != nextItemWidth) {
                 // if the width of next item view changes, then recreate it by delegate
-                if ([_delegate respondsToSelector:@selector(createItemView:forMarqueeView:)]) {
-                    [_items[_firstItemIndex].subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-                    [_delegate createItemView:_items[_firstItemIndex] forMarqueeView:self];
-                }
+                [_items[_firstItemIndex] clear];
             }
-            if ([_delegate respondsToSelector:@selector(updateItemView:atIndex:forMarqueeView:)]) {
-                [_delegate updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag forMarqueeView:self];
-            }
+            [self updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag];
 
             [UIView animateWithDuration:(currentItemWidth / _scrollSpeed) delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
                 CGFloat lastMaxX = 0.0f;
                 for (int i = 0; i < _items.count; i++) {
                     int index = (i + _firstItemIndex) % _items.count;
 
-                    CGFloat itemWidth = CGRectGetWidth(self.frame);
-                    if (_items[index].tag != -1) {
-                        if ([_delegate respondsToSelector:@selector(itemViewWidthAtIndex:forMarqueeView:)]) {
-                            itemWidth = MAX([_delegate itemViewWidthAtIndex:_items[index].tag forMarqueeView:self] + DEFAULT_ITEM_SPACING, itemWidth);
-                        }
-                    }
+                    CGFloat itemWidth = MAX(_items[index].width + DEFAULT_ITEM_SPACING, CGRectGetWidth(self.frame));
 
                     if (i == 0) {
                         continue;
@@ -348,9 +375,6 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             [self moveToNextItemIndex];
         } else {
             [self moveToNextDataIndex];
-            if (_dataIndex < 0) {
-                return;
-            }
 
             CGFloat itemWidth = CGRectGetWidth(self.frame);
             CGFloat itemHeight = CGRectGetHeight(self.frame) / _visibleItemCount;
@@ -358,9 +382,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             // move the top item to bottom without animation
             _items[_firstItemIndex].tag = _dataIndex;
             [_items[_firstItemIndex] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, itemHeight)];
-            if ([_delegate respondsToSelector:@selector(updateItemView:atIndex:forMarqueeView:)]) {
-                [_delegate updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag forMarqueeView:self];
-            }
+            [self updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag];
 
             [UIView animateWithDuration:_timeDurationPerScroll animations:^{
                 for (int i = 0; i < _items.count; i++) {
@@ -390,9 +412,13 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         dataCount = [_delegate numberOfDataForMarqueeView:self];
     }
 
-    self.dataIndex = _dataIndex + 1;
-    if (_dataIndex < 0 || _dataIndex > dataCount - 1) {
-        self.dataIndex = 0;
+    if (dataCount <= 0) {
+        self.dataIndex = -1;
+    } else {
+        self.dataIndex = _dataIndex + 1;
+        if (_dataIndex < 0 || _dataIndex > dataCount - 1) {
+            self.dataIndex = 0;
+        }
     }
 }
 
@@ -416,10 +442,17 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 
 #pragma mark - UUMarqueeViewTouchResponder(private)
 - (void)touchAtPoint:(CGPoint)point {
-    for (UIView *itemView in _items) {
+    for (UUMarqueeItemView *itemView in _items) {
         if ([itemView.layer.presentationLayer hitTest:point]) {
-            if ([self.delegate respondsToSelector:@selector(didTouchItemViewAtIndex:forMarqueeView:)]) {
-                [self.delegate didTouchItemViewAtIndex:itemView.tag forMarqueeView:self];
+            NSUInteger dataCount = 0;
+            if ([_delegate respondsToSelector:@selector(numberOfDataForMarqueeView:)]) {
+                dataCount = [_delegate numberOfDataForMarqueeView:self];
+            }
+
+            if (dataCount > 0 && itemView.tag >= 0 && itemView.tag < dataCount) {
+                if ([self.delegate respondsToSelector:@selector(didTouchItemViewAtIndex:forMarqueeView:)]) {
+                    [self.delegate didTouchItemViewAtIndex:itemView.tag forMarqueeView:self];
+                }
             }
             break;
         }
@@ -437,6 +470,16 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
     if (_touchDelegate) {
         [_touchDelegate touchAtPoint:touchLocation];
     }
+}
+
+@end
+
+#pragma mark - UUMarqueeItemView(Private)
+@implementation UUMarqueeItemView
+
+- (void)clear {
+    [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    _didFinishCreate = NO;
 }
 
 @end
