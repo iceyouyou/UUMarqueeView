@@ -1,3 +1,6 @@
 language: objective-c
-xcode_project: UUMarqueeViewDemo.xcodeproj
-xcode_scheme: UUMarqueeViewDemo
+osx_image: xcode9
+
+script:
+  - set -o pipefail
+  - xcodebuild clean build -project UUMarqueeViewDemo.xcodeproj -scheme UUMarqueeViewDemo -sdk iphonesimulator -configuration Debug
