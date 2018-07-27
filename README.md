@@ -1,4 +1,6 @@
-# UUMarqueeView  [![Build Status](https://travis-ci.org/iceyouyou/UUMarqueeView.svg?branch=master)](https://travis-ci.org/iceyouyou/UUMarqueeView)
+# UUMarqueeView
+[![Build Status](https://travis-ci.org/iceyouyou/UUMarqueeView.svg?branch=master)](https://travis-ci.org/iceyouyou/UUMarqueeView)
+
 Customizable marquee view for iOS. [Usage in English](#usage) / [中文使用方法](#使用方法)
 
 ## Demo
