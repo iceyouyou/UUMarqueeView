@@ -23,6 +23,7 @@ typedef NS_ENUM(NSUInteger, UUMarqueeViewDirection) {
 @optional
 - (NSUInteger)numberOfVisibleItemsForMarqueeView:(UUMarqueeView*)marqueeView;   // only for [UUMarqueeViewDirectionUpward]
 - (CGFloat)itemViewWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;   // only for [UUMarqueeViewDirectionLeftward]
+- (CGFloat)itemViewHeightAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;   // only for [UUMarqueeViewDirectionUpward] and [useDynamicHeight = YES]
 - (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView;
 @end
 
@@ -30,10 +31,11 @@ typedef NS_ENUM(NSUInteger, UUMarqueeViewDirection) {
 @interface UUMarqueeView : UIView
 @property (nonatomic, weak) id<UUMarqueeViewDelegate> delegate;
 @property (nonatomic, assign) NSTimeInterval timeIntervalPerScroll;
-@property (nonatomic, assign) NSTimeInterval timeDurationPerScroll; // only for [UUMarqueeViewDirectionUpward]
-@property (nonatomic, assign) float scrollSpeed;    // only for [UUMarqueeViewDirectionLeftward]
+@property (nonatomic, assign) NSTimeInterval timeDurationPerScroll; // only for [UUMarqueeViewDirectionUpward] and [useDynamicHeight = NO]
+@property (nonatomic, assign) BOOL useDynamicHeight;    // only for [UUMarqueeViewDirectionUpward]
+@property (nonatomic, assign) float scrollSpeed;    // only for [UUMarqueeViewDirectionLeftward] or [UUMarqueeViewDirectionUpward] with [useDynamicHeight = YES]
 @property (nonatomic, assign) float itemSpacing;    // only for [UUMarqueeViewDirectionLeftward]
-@property (nonatomic, assign) BOOL stopWhenLessData;  // do not scroll when all data has been shown
+@property (nonatomic, assign) BOOL stopWhenLessData;    // do not scroll when all data has been shown
 @property (nonatomic, assign) BOOL clipsToBounds;
 @property (nonatomic, assign, getter=isTouchEnabled) BOOL touchEnabled;
 @property (nonatomic, assign) UUMarqueeViewDirection direction;
@@ -57,6 +59,7 @@ typedef NS_ENUM(NSUInteger, UUMarqueeViewDirection) {
 #pragma mark - UUMarqueeItemView(Private)
 @interface UUMarqueeItemView : UIView   // UUMarqueeItemView's [tag] is the index of data source. if none data source then [tag] is -1
 @property (nonatomic, assign) BOOL didFinishCreate;
-@property (nonatomic, assign) CGFloat width;        // cache the item width, only for [UUMarqueeViewDirectionUpward]
+@property (nonatomic, assign) CGFloat width;    // cache the item width, only for [UUMarqueeViewDirectionLeftward]
+@property (nonatomic, assign) CGFloat height;   // cache the item height, only for [UUMarqueeViewDirectionUpward]
 - (void)clear;
 @end

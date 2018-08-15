@@ -7,6 +7,7 @@ Customizable marquee view for iOS. [Usage in English](#usage) / [中文使用方
 ![UUMarqueeView](https://raw.githubusercontent.com/iceyouyou/UUMarqueeView/master/extra/demo.gif)
 
 ## Revision History
+- 2018/08/15 - Add dynamic height support
 - 2018/05/16 - Add leftward scrolling support
 - 2017/06/20 - Add touch event handler
 - 2016/12/08 - Basic marquee view function

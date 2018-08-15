@@ -13,10 +13,12 @@
 
 @property (nonatomic, strong) UUMarqueeView *upwardSingleMarqueeView;
 @property (nonatomic, strong) UUMarqueeView *upwardMultiMarqueeView;
+@property (nonatomic, strong) UUMarqueeView *upwardDynamicHeightMarqueeView;
 @property (nonatomic, strong) UUMarqueeView *leftwardMarqueeView;
 
 @property (nonatomic, strong) NSArray *upwardSingleMarqueeViewData;
 @property (nonatomic, strong) NSArray *upwardMultiMarqueeViewData;
+@property (nonatomic, strong) NSArray *upwardDynamicHeightMarqueeViewData;
 @property (nonatomic, strong) NSArray *leftwardMarqueeViewData;
 
 @end
@@ -47,8 +49,19 @@
     [self.view addSubview:_upwardMultiMarqueeView];
     [_upwardMultiMarqueeView reloadData];
 
+    // Upward multi line MarqueeView (Use Dynamic Height)
+    self.upwardDynamicHeightMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 275.0f, screenWidth - 40.0f, 130.0f)];
+    _upwardDynamicHeightMarqueeView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3f];
+    _upwardDynamicHeightMarqueeView.delegate = self;
+    _upwardDynamicHeightMarqueeView.timeIntervalPerScroll = 0.0f;
+    _upwardDynamicHeightMarqueeView.scrollSpeed = 20.0f;
+    _upwardDynamicHeightMarqueeView.useDynamicHeight = YES;
+    _upwardDynamicHeightMarqueeView.touchEnabled = YES;
+    [self.view addSubview:_upwardDynamicHeightMarqueeView];
+    [_upwardDynamicHeightMarqueeView reloadData];
+
     // Leftward MarqueeView
-    self.leftwardMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 300.0f, screenWidth - 40.0f, 20.0f) direction:UUMarqueeViewDirectionLeftward];
+    self.leftwardMarqueeView = [[UUMarqueeView alloc] initWithFrame:CGRectMake(20.0f, 475.0f, screenWidth - 40.0f, 20.0f) direction:UUMarqueeViewDirectionLeftward];
     _leftwardMarqueeView.delegate = self;
     _leftwardMarqueeView.timeIntervalPerScroll = 0.0f;
     _leftwardMarqueeView.scrollSpeed = 60.0f;
@@ -70,6 +83,9 @@
     if (_upwardMultiMarqueeView) {
         [_upwardMultiMarqueeView start];
     }
+    if (_upwardDynamicHeightMarqueeView) {
+        [_upwardDynamicHeightMarqueeView start];
+    }
     if (_leftwardMarqueeView) {
         [_leftwardMarqueeView start];
     }
@@ -85,6 +101,9 @@
     if (_upwardMultiMarqueeView) {
         [_upwardMultiMarqueeView pause];
     }
+    if (_upwardDynamicHeightMarqueeView) {
+        [_upwardDynamicHeightMarqueeView pause];
+    }
     if (_leftwardMarqueeView) {
         [_leftwardMarqueeView pause];
     }
@@ -95,9 +114,12 @@
     if (marqueeView == _upwardSingleMarqueeView) {
         // for upwardSingleMarqueeView
         return 1;
-    } else {
+    } else if (marqueeView == _upwardMultiMarqueeView) {
         // for upwardMultiMarqueeView
         return 3;
+    } else {
+        // for upwardDynamicHeightMarqueeView
+        return 2;
     }
 }
 
@@ -108,6 +130,9 @@
     } else if (marqueeView == _upwardMultiMarqueeView) {
         // for upwardMultiMarqueeView
         return _upwardMultiMarqueeViewData ? _upwardMultiMarqueeViewData.count : 0;
+    } else if (marqueeView == _upwardDynamicHeightMarqueeView) {
+        // for upwardDynamicHeightMarqueeView
+        return _upwardDynamicHeightMarqueeViewData ? _upwardDynamicHeightMarqueeViewData.count : 0;
     } else {
         // for leftwardMarqueeView
         return _leftwardMarqueeViewData ? _leftwardMarqueeViewData.count : 0;
@@ -141,6 +166,23 @@
         content.font = [UIFont systemFontOfSize:10.0f];
         content.tag = 1001;
         [itemView addSubview:content];
+    } else if (marqueeView == _upwardDynamicHeightMarqueeView) {
+        // for upwardDynamicHeightMarqueeView
+        UIView *bgView = [[UIView alloc] initWithFrame:CGRectMake(5.0f, 5.0f, CGRectGetWidth(itemView.bounds) - 5.0f - 5.0f, CGRectGetHeight(itemView.bounds) - 5.0f - 5.0f)];
+        bgView.tag = 1002;
+        bgView.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6f];
+        bgView.layer.cornerRadius = (CGRectGetHeight(itemView.bounds) - 5.0f - 5.0f) / 2.0f;
+        [itemView addSubview:bgView];
+
+        UIImageView *icon = [[UIImageView alloc] initWithFrame:CGRectMake(5.0f, (CGRectGetHeight(itemView.bounds) - 16.0f) / 2.0f, 16.0f, 16.0f)];
+        icon.tag = 1003;
+        [itemView addSubview:icon];
+
+        UILabel *content = [[UILabel alloc] initWithFrame:CGRectMake(5.0f + 16.0f, 0.0f, CGRectGetWidth(itemView.bounds) - 5.0f - 16.0f - 5.0f, CGRectGetHeight(itemView.bounds))];
+        content.numberOfLines = 0;
+        content.font = [UIFont systemFontOfSize:10.0f];
+        content.tag = 1001;
+        [itemView addSubview:content];
     } else {
         // for leftwardMarqueeView
         itemView.backgroundColor = [UIColor colorWithRed:228.0f/255.0f green:228.0f/255.0f blue:228.0f/255.0f alpha:1.0f];
@@ -171,6 +213,19 @@
 
         UIImageView *icon = [itemView viewWithTag:1003];
         icon.image = [UIImage imageNamed:[_upwardMultiMarqueeViewData[index] objectForKey:@"icon"]];
+    } else if (marqueeView == _upwardDynamicHeightMarqueeView) {
+        // for upwardDynamicHeightMarqueeView
+        UILabel *content = [itemView viewWithTag:1001];
+        content.text = [_upwardDynamicHeightMarqueeViewData[index] objectForKey:@"content"];
+
+        UIImageView *icon = [itemView viewWithTag:1003];
+        [icon setFrame:CGRectMake(5.0f, (CGRectGetHeight(itemView.bounds) - 16.0f) / 2.0f, 16.0f, 16.0f)];
+        icon.image = [UIImage imageNamed:[_upwardDynamicHeightMarqueeViewData[index] objectForKey:@"icon"]];
+
+        CGSize contentFitSize = [content sizeThatFits:CGSizeMake(CGRectGetWidth(itemView.bounds) - 5.0f - 16.0f - 5.0f, MAXFLOAT)];
+        UIView *bgView = [itemView viewWithTag:1002];
+        [bgView setFrame:CGRectMake(5.0f, 5.0f, 16.0f + contentFitSize.width + 4.0f, CGRectGetHeight(itemView.bounds) - 5.0f - 5.0f)];
+        bgView.layer.cornerRadius = (CGRectGetHeight(itemView.bounds) - 5.0f - 5.0f) / 2.0f;
     } else {
         // for leftwardMarqueeView
         UILabel *content = [itemView viewWithTag:1001];
@@ -179,6 +234,16 @@
         UIImageView *icon = [itemView viewWithTag:1002];
         icon.image = [UIImage imageNamed:@"speaker"];
     }
+}
+
+- (CGFloat)itemViewHeightAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
+    // for upwardDynamicHeightMarqueeView
+    UILabel *content = [[UILabel alloc] init];
+    content.numberOfLines = 0;
+    content.font = [UIFont systemFontOfSize:10.0f];
+    content.text = [_upwardDynamicHeightMarqueeViewData[index] objectForKey:@"content"];
+    CGSize contentFitSize = [content sizeThatFits:CGSizeMake(CGRectGetWidth(marqueeView.frame) - 5.0f - 16.0f - 5.0f, MAXFLOAT)];
+    return contentFitSize.height + 20.0f;
 }
 
 - (CGFloat)itemViewWidthAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
@@ -204,6 +269,12 @@
                                         @{@"content":@"Unexpected surprise for travelers", @"time":@"20 minutes ago", @"icon":@"icon-3"},
                                         @{@"content":@"Drinking tea in outer space", @"time":@"1 hour ago", @"icon":@"icon-4"},
                                         @{@"content":@"Food along the Silk Road", @"time":@"2 hour ago", @"icon":@"icon-5"}];
+
+    self.upwardDynamicHeightMarqueeViewData = @[@{@"content":@"First snow at Forbidden City", @"time":@"10 seconds ago", @"icon":@"icon-1"},
+                                                @{@"content":@"Night view of Longmen Grottoes; Night view of Longmen Grottoes", @"time":@"12 minutes ago", @"icon":@"icon-2"},
+                                                @{@"content":@"Unexpected surprise for travelers", @"time":@"20 minutes ago", @"icon":@"icon-3"},
+                                                @{@"content":@"Drinking tea in outer space; Drinking tea in outer space; Drinking tea in outer space", @"time":@"1 hour ago", @"icon":@"icon-4"},
+                                                @{@"content":@"Food along the Silk Road", @"time":@"2 hour ago", @"icon":@"icon-5"}];
 
     self.leftwardMarqueeViewData = @[@"Do not go gentle into that good night,",
                                      @"Old age should burn and rave at close of day; Rage, rage against the dying of the light.",
@@ -263,13 +334,32 @@
     [self.view addSubview:multiPauseBtn];
     [multiPauseBtn addTarget:self action:@selector(handleMultiPauseAction:) forControlEvents:UIControlEventTouchUpInside];
 
+    // Upward multi line MarqueeView (Use Dynamic Height)
+    UIButton *dynamicHeightStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 410.0f, 50.0f, 20.0f)];
+    dynamicHeightStartBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [dynamicHeightStartBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [dynamicHeightStartBtn setTitle:@"Start" forState:UIControlStateNormal];
+    dynamicHeightStartBtn.layer.cornerRadius = 4.0f;
+    dynamicHeightStartBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:dynamicHeightStartBtn];
+    [dynamicHeightStartBtn addTarget:self action:@selector(handleDynamicHeightStartAction:) forControlEvents:UIControlEventTouchUpInside];
+
+    UIButton *dynamicHeightPauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 410.0f, 50.0f, 20.0f)];
+    dynamicHeightPauseBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
+    [dynamicHeightPauseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [dynamicHeightPauseBtn setTitle:@"Pause" forState:UIControlStateNormal];
+    dynamicHeightPauseBtn.layer.cornerRadius = 4.0f;
+    dynamicHeightPauseBtn.layer.borderWidth = 1.0f;
+    [self.view addSubview:dynamicHeightPauseBtn];
+    [dynamicHeightPauseBtn addTarget:self action:@selector(handleDynamicHeightPauseAction:) forControlEvents:UIControlEventTouchUpInside];
+
     // leftward MarqueeView
-    UILabel *leftwardTitle = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 275.0f, screenWidth - 40.0f, 20.0f)];
+    UILabel *leftwardTitle = [[UILabel alloc] initWithFrame:CGRectMake(20.0f, 450.0f, screenWidth - 40.0f, 20.0f)];
     leftwardTitle.text = @"Direction = Leftward";
     leftwardTitle.font = [UIFont systemFontOfSize:12.0f];
     [self.view addSubview:leftwardTitle];
 
-    UIButton *leftwardStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 325.0f, 50.0f, 20.0f)];
+    UIButton *leftwardStartBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f - 10.0f - 50.0f, 500.0f, 50.0f, 20.0f)];
     leftwardStartBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
     [leftwardStartBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [leftwardStartBtn setTitle:@"Start" forState:UIControlStateNormal];
@@ -278,7 +368,7 @@
     [self.view addSubview:leftwardStartBtn];
     [leftwardStartBtn addTarget:self action:@selector(handleLeftwardStartAction:) forControlEvents:UIControlEventTouchUpInside];
 
-    UIButton *leftwardPauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 325.0f, 50.0f, 20.0f)];
+    UIButton *leftwardPauseBtn = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth - 20.0f - 50.0f, 500.0f, 50.0f, 20.0f)];
     leftwardPauseBtn.titleLabel.font = [UIFont systemFontOfSize:10.0f];
     [leftwardPauseBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [leftwardPauseBtn setTitle:@"Pause" forState:UIControlStateNormal];
@@ -309,6 +399,18 @@
 - (void)handleMultiPauseAction:(id)sender {
     if (_upwardMultiMarqueeView) {
         [_upwardMultiMarqueeView pause];
+    }
+}
+
+- (void)handleDynamicHeightStartAction:(id)sender {
+    if (_upwardDynamicHeightMarqueeView) {
+        [_upwardDynamicHeightMarqueeView start];
+    }
+}
+
+- (void)handleDynamicHeightPauseAction:(id)sender {
+    if (_upwardDynamicHeightMarqueeView) {
+        [_upwardDynamicHeightMarqueeView pause];
     }
 }
 
