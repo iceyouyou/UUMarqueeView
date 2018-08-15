@@ -255,7 +255,11 @@
 }
 
 - (void)didTouchItemViewAtIndex:(NSUInteger)index forMarqueeView:(UUMarqueeView*)marqueeView {
-    NSLog(@"Touch at index %lu - \"%@\"", (unsigned long)index, [_upwardMultiMarqueeViewData[index] objectForKey:@"content"]);
+    if (marqueeView == _upwardMultiMarqueeView) {
+        NSLog(@"Touch at index %lu - \"%@\"", (unsigned long)index, [_upwardMultiMarqueeViewData[index] objectForKey:@"content"]);
+    } else {
+        NSLog(@"Touch at index %lu - \"%@\"", (unsigned long)index, [_upwardDynamicHeightMarqueeViewData[index] objectForKey:@"content"]);
+    }
 }
 
 #pragma mark - Nothing Important
