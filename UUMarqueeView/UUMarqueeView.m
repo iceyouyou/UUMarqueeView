@@ -175,16 +175,9 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
     } else {
         if (_useDynamicHeight) {
             CGFloat itemWidth = CGRectGetWidth(self.frame);
-            CGFloat lastMaxY = 0.0f;
             for (int i = 0; i < _items.count; i++) {
                 int index = (i + _firstItemIndex) % _items.count;
-                if (i == 0) {
-                    [_items[index] setFrame:CGRectMake(0.0f, 0.0f, itemWidth, 0.0f)];
-                    lastMaxY = 0.0f;
-
-                    [self createItemView:_items[index]];
-                    _items[index].tag = _dataIndex;
-                } else if (i == _items.count - 1) {
+                if (i == _items.count - 1) {
                     [self moveToNextDataIndex];
                     _items[index].tag = _dataIndex;
                     _items[index].height = [self itemHeightAtIndex:_items[index].tag];
@@ -192,25 +185,11 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     [_items[index] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, _items[index].height)];
                     [self updateItemView:_items[index] atIndex:_items[index].tag];
                 } else {
-                    [self moveToNextDataIndex];
                     _items[index].tag = _dataIndex;
-                    _items[index].height = [self itemHeightAtIndex:_items[index].tag];
+                    _items[index].alpha = 0.0f;
 
-                    [_items[index] setFrame:CGRectMake(0.0f, lastMaxY, itemWidth, _items[index].height)];
-                    lastMaxY = lastMaxY + _items[index].height;
-
-                    [self updateItemView:_items[index] atIndex:_items[index].tag];
-                }
-            }
-
-            CGFloat offsetY = CGRectGetHeight(self.frame) - lastMaxY;
-            for (int i = 0; i < _items.count; i++) {
-                int index = (i + _firstItemIndex) % _items.count;
-                if (i > 0 && i < _items.count - 1) {
-                    [_items[index] setFrame:CGRectMake(CGRectGetMinX(_items[index].frame),
-                                                       CGRectGetMinY(_items[index].frame) + offsetY,
-                                                       itemWidth,
-                                                       _items[index].height)];
+                    [_items[index] setFrame:CGRectMake(0.0f, 0.0f, itemWidth, 0.0f)];
+                    [self createItemView:_items[index]];
                 }
             }
         } else {
@@ -219,10 +198,10 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             for (int i = 0; i < _items.count; i++) {
                 int index = (i + _firstItemIndex) % _items.count;
                 if (i == 0) {
-                    [_items[index] setFrame:CGRectMake(0.0f, -itemHeight, itemWidth, itemHeight)];
-
-                    [self createItemView:_items[index]];
                     _items[index].tag = _dataIndex;
+
+                    [_items[index] setFrame:CGRectMake(0.0f, -itemHeight, itemWidth, itemHeight)];
+                    [self createItemView:_items[index]];
                 } else if (i == _items.count - 1) {
                     [self moveToNextDataIndex];
                     _items[index].tag = _dataIndex;
