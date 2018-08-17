@@ -181,6 +181,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     [self moveToNextDataIndex];
                     _items[index].tag = _dataIndex;
                     _items[index].height = [self itemHeightAtIndex:_items[index].tag];
+                    _items[index].alpha = 0.0f;
 
                     [_items[index] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, _items[index].height)];
                     [self updateItemView:_items[index] atIndex:_items[index].tag];
@@ -189,7 +190,6 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     _items[index].alpha = 0.0f;
 
                     [_items[index] setFrame:CGRectMake(0.0f, 0.0f, itemWidth, 0.0f)];
-                    [self createItemView:_items[index]];
                 }
             }
         } else {
@@ -461,7 +461,6 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                 [_items[_firstItemIndex] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, itemHeight)];
             }
             [self updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag];
-            _items[_firstItemIndex].alpha = 1.0f;
 
             if (_useDynamicHeight) {
                 int lastItemIndex = (int)(_items.count - 1 + _firstItemIndex) % _items.count;
@@ -482,6 +481,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                                                                CGRectGetMinY(_items[index].frame) - lastItemHeight,
                                                                itemWidth,
                                                                _items[index].height)];
+                            _items[index].alpha = 1.0f;
                         }
                     }
                 } completion:^(BOOL finished) {
