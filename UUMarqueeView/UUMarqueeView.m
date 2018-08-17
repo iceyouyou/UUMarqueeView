@@ -18,6 +18,8 @@
 @property (nonatomic, strong) NSTimer *scrollTimer;
 @property (nonatomic, strong) UUMarqueeViewTouchReceiver *touchReceiver;
 
+@property (nonatomic, assign) BOOL scrollStop;
+
 @end
 
 @implementation UUMarqueeView
@@ -78,25 +80,32 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 - (void)reloadData {
-    [self pause];
-    [self resetAll];
-    [self startAfterTimeInterval:YES];
-}
-
-- (void)start {
-    [self startAfterTimeInterval:NO];
-}
-
-- (void)pause {
     if (_scrollTimer) {
         [_scrollTimer invalidate];
         self.scrollTimer = nil;
     }
+    [self resetAll];
+    self.scrollStop = NO;
+    [self startAfterTimeInterval:YES];
+}
+
+- (void)start {
+    self.scrollStop = NO;
+    [self startAfterTimeInterval:NO];
+}
+
+- (void)pause {
+    self.scrollStop = YES;
 }
 
 - (void)repeat {
-    [self pause];
-    [self startAfterTimeInterval:YES];
+    if (_scrollTimer) {
+        [_scrollTimer invalidate];
+        self.scrollTimer = nil;
+    }
+    if (!_scrollStop) {
+        [self startAfterTimeInterval:YES];
+    }
 }
 
 #pragma mark - Override(private)
@@ -436,7 +445,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     }
                 }
             } completion:^(BOOL finished) {
-                if (_scrollTimer) {
+                if (finished && _scrollTimer) {
                     [self repeat];
                 }
             }];
@@ -485,7 +494,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                         }
                     }
                 } completion:^(BOOL finished) {
-                    if (_scrollTimer) {
+                    if (finished && _scrollTimer) {
                         [self repeat];
                     }
                 }];
@@ -502,7 +511,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                         }
                     }
                 } completion:^(BOOL finished) {
-                    if (_scrollTimer) {
+                    if (finished && _scrollTimer) {
                         [self repeat];
                     }
                 }];
