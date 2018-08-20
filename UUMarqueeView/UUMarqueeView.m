@@ -18,7 +18,9 @@
 @property (nonatomic, strong) NSTimer *scrollTimer;
 @property (nonatomic, strong) UUMarqueeViewTouchReceiver *touchReceiver;
 
-@property (nonatomic, assign) BOOL scrollStop;
+@property (nonatomic, assign) BOOL isWaiting;
+@property (nonatomic, assign) BOOL isScrolling;
+@property (nonatomic, assign) BOOL isScrollNeedsToStop;
 
 @end
 
@@ -80,32 +82,52 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 - (void)reloadData {
-    if (_scrollTimer) {
-        [_scrollTimer invalidate];
-        self.scrollTimer = nil;
+    if (_isWaiting) {
+        if (_scrollTimer) {
+            [_scrollTimer invalidate];
+            self.scrollTimer = nil;
+        }
+        [self resetAll];
+        [self startAfterTimeInterval:YES];
+    } else if (_isScrolling) {
+        [self resetAll];
+    } else {
+        // stopped
+        [self resetAll];
+        [self startAfterTimeInterval:YES];
     }
-    [self resetAll];
-    self.scrollStop = NO;
-    [self startAfterTimeInterval:YES];
 }
 
 - (void)start {
-    self.scrollStop = NO;
-    [self startAfterTimeInterval:NO];
+    if (!_isScrolling && !_isWaiting) {
+        [self startAfterTimeInterval:NO];
+    } else {
+        self.isScrollNeedsToStop = NO;
+    }
 }
 
 - (void)pause {
-    self.scrollStop = YES;
+    self.isScrollNeedsToStop = YES;
 }
 
 - (void)repeat {
-    if (_scrollTimer) {
-        [_scrollTimer invalidate];
-        self.scrollTimer = nil;
-    }
-    if (!_scrollStop) {
+    if (!_isScrollNeedsToStop) {
         [self startAfterTimeInterval:YES];
     }
+}
+
+- (void)startAfterTimeInterval:(BOOL)afterTimeInterval {
+    if (_isScrolling || _items.count <= 0) {
+        return;
+    }
+
+    self.isScrollNeedsToStop = NO;
+    self.isWaiting = YES;
+    self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:afterTimeInterval ? _timeIntervalPerScroll : 0.0
+                                                        target:self
+                                                      selector:@selector(scrollTimerDidFire:)
+                                                      userInfo:nil
+                                                       repeats:NO];
 }
 
 #pragma mark - Override(private)
@@ -353,19 +375,9 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 #pragma mark - Timer & Animation(private)
-- (void)startAfterTimeInterval:(BOOL)afterTimeInterval {
-    if (_scrollTimer || _items.count <= 0) {
-        return;
-    }
-
-    self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:afterTimeInterval ? _timeIntervalPerScroll : 0.0
-                                                        target:self
-                                                      selector:@selector(scrollTimerDidFire:)
-                                                      userInfo:nil
-                                                       repeats:NO];
-}
-
 - (void)scrollTimerDidFire:(NSTimer *)timer {
+    self.isWaiting = NO;
+    self.isScrolling = YES;
     if (_stopWhenLessData) {
         NSUInteger dataCount = 0;
         if ([_delegate respondsToSelector:@selector(numberOfDataForMarqueeView:)]) {
@@ -375,8 +387,11 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             if (dataCount <= 1) {
                 CGFloat itemWidth = MAX(_items[1].width + _itemSpacing, CGRectGetWidth(self.frame));
                 if (itemWidth <= CGRectGetWidth(self.frame)) {
+                    __weak __typeof(self) weakSelf = self;
                     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_timeDurationPerScroll * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        if (_scrollTimer) {
+                        __strong __typeof(self) self = weakSelf;
+                        if (self) {
+                            self.isScrolling = NO;
                             [self repeat];
                         }
                     });
@@ -385,8 +400,11 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             }
         } else {
             if (dataCount <= _visibleItemCount) {
+                __weak __typeof(self) weakSelf = self;
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_timeDurationPerScroll * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    if (_scrollTimer) {
+                    __strong __typeof(self) self = weakSelf;
+                    if (self) {
+                        self.isScrolling = NO;
                         [self repeat];
                     }
                 });
@@ -427,6 +445,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             }
             [self updateItemView:_items[_firstItemIndex] atIndex:_items[_firstItemIndex].tag];
 
+            __weak __typeof(self) weakSelf = self;
             [UIView animateWithDuration:(currentItemWidth / _scrollSpeed) delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
                 CGFloat lastMaxX = 0.0f;
                 for (int i = 0; i < _items.count; i++) {
@@ -445,7 +464,9 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     }
                 }
             } completion:^(BOOL finished) {
-                if (finished && _scrollTimer) {
+                __strong __typeof(self) self = weakSelf;
+                if (self) {
+                    self.isScrolling = NO;
                     [self repeat];
                 }
             }];
@@ -474,6 +495,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             if (_useDynamicHeight) {
                 int lastItemIndex = (int)(_items.count - 1 + _firstItemIndex) % _items.count;
                 CGFloat lastItemHeight = _items[lastItemIndex].height;
+                __weak __typeof(self) weakSelf = self;
                 [UIView animateWithDuration:(lastItemHeight / _scrollSpeed) delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
                     for (int i = 0; i < _items.count; i++) {
                         int index = (i + _firstItemIndex) % _items.count;
@@ -494,11 +516,14 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                         }
                     }
                 } completion:^(BOOL finished) {
-                    if (finished && _scrollTimer) {
+                    __strong __typeof(self) self = weakSelf;
+                    if (self) {
+                        self.isScrolling = NO;
                         [self repeat];
                     }
                 }];
             } else {
+                __weak __typeof(self) weakSelf = self;
                 [UIView animateWithDuration:_timeDurationPerScroll animations:^{
                     for (int i = 0; i < _items.count; i++) {
                         int index = (i + _firstItemIndex) % _items.count;
@@ -511,7 +536,9 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                         }
                     }
                 } completion:^(BOOL finished) {
-                    if (finished && _scrollTimer) {
+                    __strong __typeof(self) self = weakSelf;
+                    if (self) {
+                        self.isScrolling = NO;
                         [self repeat];
                     }
                 }];
