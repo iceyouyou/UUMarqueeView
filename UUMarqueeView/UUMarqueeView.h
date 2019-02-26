@@ -48,7 +48,9 @@ typedef NS_ENUM(NSUInteger, UUMarqueeViewDirection) {
 
 #pragma mark - UUMarqueeViewTouchResponder(Private)
 @protocol UUMarqueeViewTouchResponder <NSObject>
-- (void)touchAtPoint:(CGPoint)point;
+- (void)touchesBegan;
+- (void)touchesEndedAtPoint:(CGPoint)point;
+- (void)touchesCancelled;
 @end
 
 #pragma mark - UUMarqueeViewTouchReceiver(Private)

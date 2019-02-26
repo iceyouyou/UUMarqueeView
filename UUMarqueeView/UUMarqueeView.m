@@ -21,6 +21,7 @@
 @property (nonatomic, assign) BOOL isWaiting;
 @property (nonatomic, assign) BOOL isScrolling;
 @property (nonatomic, assign) BOOL isScrollNeedsToStop;
+@property (nonatomic, assign) BOOL isPausingBeforeTouchesBegan;
 
 @end
 
@@ -99,10 +100,9 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 - (void)start {
+    self.isScrollNeedsToStop = NO;
     if (!_isScrolling && !_isWaiting) {
         [self startAfterTimeInterval:NO];
-    } else {
-        self.isScrollNeedsToStop = NO;
     }
 }
 
@@ -121,7 +121,6 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         return;
     }
 
-    self.isScrollNeedsToStop = NO;
     self.isWaiting = YES;
     self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:afterTimeInterval ? _timeIntervalPerScroll : 0.0
                                                         target:self
@@ -377,6 +376,10 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 #pragma mark - Timer & Animation(private)
 - (void)scrollTimerDidFire:(NSTimer *)timer {
     self.isWaiting = NO;
+    if (_isScrollNeedsToStop) {
+        return;
+    }
+
     self.isScrolling = YES;
     if (_stopWhenLessData) {
         NSUInteger dataCount = 0;
@@ -585,7 +588,12 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 }
 
 #pragma mark - UUMarqueeViewTouchResponder(private)
-- (void)touchAtPoint:(CGPoint)point {
+- (void)touchesBegan {
+    self.isPausingBeforeTouchesBegan = _isScrollNeedsToStop;
+    [self pause];
+}
+
+- (void)touchesEndedAtPoint:(CGPoint)point {
     for (UUMarqueeItemView *itemView in _items) {
         if ([itemView.layer.presentationLayer hitTest:point]) {
             NSUInteger dataCount = 0;
@@ -601,6 +609,15 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
             break;
         }
     }
+    if (!_isPausingBeforeTouchesBegan) {
+        [self start];
+    }
+}
+
+- (void)touchesCancelled {
+    if (!_isPausingBeforeTouchesBegan) {
+        [self start];
+    }
 }
 
 @end
@@ -609,10 +626,22 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 @implementation UUMarqueeViewTouchReceiver
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    if (_touchDelegate) {
+        [_touchDelegate touchesBegan];
+    }
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint touchLocation = [touch locationInView:self];
     if (_touchDelegate) {
-        [_touchDelegate touchAtPoint:touchLocation];
+        [_touchDelegate touchesEndedAtPoint:touchLocation];
+    }
+}
+
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    if (_touchDelegate) {
+        [_touchDelegate touchesCancelled];
     }
 }
 
