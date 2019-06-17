@@ -223,6 +223,11 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                 }
             }
         } else {
+            NSUInteger dataCount = 0;
+            if ([_delegate respondsToSelector:@selector(numberOfDataForMarqueeView:)]) {
+                dataCount = [_delegate numberOfDataForMarqueeView:self];
+            }
+
             CGFloat itemWidth = CGRectGetWidth(self.frame);
             CGFloat itemHeight = CGRectGetHeight(self.frame) / _visibleItemCount;
             for (int i = 0; i < _items.count; i++) {
@@ -232,18 +237,21 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
 
                     [_items[index] setFrame:CGRectMake(0.0f, -itemHeight, itemWidth, itemHeight)];
                     [self createItemView:_items[index]];
-                } else if (i == _items.count - 1) {
-                    [self moveToNextDataIndex];
-                    _items[index].tag = _dataIndex;
-
-                    [_items[index] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, itemHeight)];
-                    [self updateItemView:_items[index] atIndex:_items[index].tag];
                 } else {
                     [self moveToNextDataIndex];
                     _items[index].tag = _dataIndex;
 
                     [_items[index] setFrame:CGRectMake(0.0f, itemHeight * (i - 1), itemWidth, itemHeight)];
-                    [self updateItemView:_items[index] atIndex:_items[index].tag];
+
+                    if (_stopWhenLessData) {
+                        if (i <= dataCount) {
+                            [self updateItemView:_items[index] atIndex:_items[index].tag];
+                        } else {
+                            [self createItemView:_items[index]];
+                        }
+                    } else {
+                        [self updateItemView:_items[index] atIndex:_items[index].tag];
+                    }
                 }
             }
         }
@@ -303,8 +311,6 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                 int index = (i + _firstItemIndex) % _items.count;
                 if (i == 0) {
                     [_items[index] setFrame:CGRectMake(0.0f, -itemHeight, itemWidth, itemHeight)];
-                } else if (i == _items.count - 1) {
-                    [_items[index] setFrame:CGRectMake(0.0f, CGRectGetMaxY(self.bounds), itemWidth, itemHeight)];
                 } else {
                     [_items[index] setFrame:CGRectMake(0.0f, itemHeight * (i - 1), itemWidth, itemHeight)];
                 }
