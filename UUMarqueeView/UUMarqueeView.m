@@ -33,6 +33,22 @@ static NSTimeInterval const DEFAULT_TIME_DURATION = 1.0;
 static float const DEFAULT_SCROLL_SPEED = 40.0f;
 static float const DEFAULT_ITEM_SPACING = 20.0f;
 
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
+    if (self = [super initWithCoder:aDecoder]) {
+        _timeIntervalPerScroll = DEFAULT_TIME_INTERVAL;
+        _timeDurationPerScroll = DEFAULT_TIME_DURATION;
+        _scrollSpeed = DEFAULT_SCROLL_SPEED;
+        _itemSpacing = DEFAULT_ITEM_SPACING;
+        _touchEnabled = NO;
+        _stopWhenLessData = NO;
+
+        _contentView = [[UIView alloc] initWithFrame:self.bounds];
+        _contentView.clipsToBounds = YES;
+        [self addSubview:_contentView];
+    }
+    return self;
+}
+
 - (instancetype)initWithDirection:(UUMarqueeViewDirection)direction {
     if (self = [super init]) {
         _direction = direction;
