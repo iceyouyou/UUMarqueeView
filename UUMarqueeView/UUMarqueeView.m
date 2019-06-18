@@ -548,8 +548,13 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     }
                 }];
             } else {
+                UIViewAnimationOptions animationOptions = UIViewAnimationOptionCurveEaseInOut;
+                if (_timeIntervalPerScroll <= 0.0) {
+                    // smooth animation
+                    animationOptions = UIViewAnimationOptionCurveLinear;
+                }
                 __weak __typeof(self) weakSelf = self;
-                [UIView animateWithDuration:_timeDurationPerScroll animations:^{
+                [UIView animateWithDuration:_timeDurationPerScroll delay:0.0 options:animationOptions animations:^{
                     for (int i = 0; i < _items.count; i++) {
                         int index = (i + _firstItemIndex) % _items.count;
                         if (i == 0) {
