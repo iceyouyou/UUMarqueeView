@@ -22,6 +22,7 @@
 @property (nonatomic, assign) BOOL isScrolling;
 @property (nonatomic, assign) BOOL isScrollNeedsToStop;
 @property (nonatomic, assign) BOOL isPausingBeforeTouchesBegan;
+@property (nonatomic, assign) BOOL isPausingBeforeResignActive;
 
 @end
 
@@ -45,6 +46,15 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         _contentView = [[UIView alloc] initWithFrame:self.bounds];
         _contentView.clipsToBounds = YES;
         [self addSubview:_contentView];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleResignActiveNotification:)
+                                                     name:UIApplicationWillResignActiveNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBecomeActiveNotification:)
+                                                     name:UIApplicationDidBecomeActiveNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -69,6 +79,15 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         _contentView = [[UIView alloc] initWithFrame:self.bounds];
         _contentView.clipsToBounds = YES;
         [self addSubview:_contentView];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleResignActiveNotification:)
+                                                     name:UIApplicationWillResignActiveNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBecomeActiveNotification:)
+                                                     name:UIApplicationDidBecomeActiveNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -85,6 +104,15 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
         _contentView = [[UIView alloc] initWithFrame:self.bounds];
         _contentView.clipsToBounds = YES;
         [self addSubview:_contentView];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleResignActiveNotification:)
+                                                     name:UIApplicationWillResignActiveNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleBecomeActiveNotification:)
+                                                     name:UIApplicationDidBecomeActiveNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -132,13 +160,27 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
     }
 }
 
+- (void)repeatWithAnimationFinished:(BOOL)finished {
+    if (!_isScrollNeedsToStop) {
+        [self startAfterTimeInterval:YES animationFinished:finished];
+    }
+}
+
 - (void)startAfterTimeInterval:(BOOL)afterTimeInterval {
+    [self startAfterTimeInterval:afterTimeInterval animationFinished:YES];
+}
+
+- (void)startAfterTimeInterval:(BOOL)afterTimeInterval animationFinished:(BOOL)finished {
     if (_isScrolling || _items.count <= 0) {
         return;
     }
 
     self.isWaiting = YES;
-    self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:afterTimeInterval ? _timeIntervalPerScroll : 0.0
+    NSTimeInterval timeInterval = 1.0;
+    if (finished) {
+        timeInterval = afterTimeInterval ? _timeIntervalPerScroll : 0.0;
+    }
+    self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:timeInterval
                                                         target:self
                                                       selector:@selector(scrollTimerDidFire:)
                                                       userInfo:nil
@@ -160,6 +202,20 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
     if (_scrollTimer) {
         [_scrollTimer invalidate];
         self.scrollTimer = nil;
+    }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+
+#pragma mark - Notification
+- (void)handleResignActiveNotification:(NSNotification*)notification {
+    self.isPausingBeforeResignActive = _isScrollNeedsToStop;
+    [self pause];
+}
+
+- (void)handleBecomeActiveNotification:(NSNotification*)notification {
+    if (!_isPausingBeforeResignActive) {
+        [self start];
     }
 }
 
@@ -492,7 +548,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                 __strong __typeof(self) self = weakSelf;
                 if (self) {
                     self.isScrolling = NO;
-                    [self repeat];
+                    [self repeatWithAnimationFinished:finished];
                 }
             }];
             [self moveToNextItemIndex];
@@ -544,7 +600,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     __strong __typeof(self) self = weakSelf;
                     if (self) {
                         self.isScrolling = NO;
-                        [self repeat];
+                        [self repeatWithAnimationFinished:finished];
                     }
                 }];
             } else {
@@ -569,7 +625,7 @@ static float const DEFAULT_ITEM_SPACING = 20.0f;
                     __strong __typeof(self) self = weakSelf;
                     if (self) {
                         self.isScrolling = NO;
-                        [self repeat];
+                        [self repeatWithAnimationFinished:finished];
                     }
                 }];
             }

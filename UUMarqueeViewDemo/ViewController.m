@@ -29,6 +29,7 @@
     [super viewDidLoad];
 
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
+    [self.view setBackgroundColor:UIColor.whiteColor];
 
     [self prepareDataSource];
 
